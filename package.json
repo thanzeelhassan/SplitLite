@@ -1,0 +1,12 @@
+{
+  "name": "splitlite",
+  "version": "1.0.0",
+  "description": "A website to help split expenses between friends.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
