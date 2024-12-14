@@ -1,6 +1,11 @@
 const express = require("express");
 const app = express();
 
+app.use(cors({
+  origin: 'http://localhost:5173', // React app's URL
+}));
+
+
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to SplitLite");
 });
