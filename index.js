@@ -9,5 +9,6 @@ app.get("/name", (req, res) => {
   res.json({ name: "John" });
 });
 
-app.listen(3000);
-console.log("Started listening");
+app.listen(3000, () => {
+  console.log("Started listening on port: 3000");
+});
