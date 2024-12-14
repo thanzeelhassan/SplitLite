@@ -1,0 +1,2 @@
+npm start - Start the server
+npm run dev - Use for local development. Does the same thing as npm start, but code changes are reflected instantly.
