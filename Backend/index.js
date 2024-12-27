@@ -32,7 +32,7 @@ const sql = neon(process.env.DATABASE_URL);
 app.get("/register", async (req, res) => {
   console.log("Registering");
   try {
-    const { user_name, email, phone, password, confirm_password } = req.body;
+    const { username, email, phone, password, confirmPassword } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
     const result =
       await sql`INSERT INTO users (name, email, phone_number, password) VALUES (${user_name}, ${email}, ${phone}, ${hashedPassword});`;
