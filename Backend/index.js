@@ -34,7 +34,7 @@ app.get("/register", async (req, res) => {
     email = "thanzeelhassan4@gmail.com";
     phone = "6235611194";
     const result =
-      await sql`INSERT INTO users (name, email, phone_number) VALUES ('Thanzeel8', 'thanzeelhass8@gmail.com', '6235611198');`;
+      await sql`INSERT INTO users (name, email, phone_number, password) VALUES ('Thanzeel8', 'thanzeelhass8@gmail.com', '6235611198', 'password');`;
     console.log("result : ", result);
     console.log("length of result : ", result.length);
     if (result.length === 0) {
