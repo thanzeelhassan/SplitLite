@@ -30,15 +30,18 @@ const sql = neon(process.env.DATABASE_URL);
 app.get("/register", async (req, res) => {
   console.log("Registering");
   try {
-    user_name = "Thanzeel4";
-    email = "thanzeelhassan4@gmail.com";
-    phone = "6235611194";
+    user_name = "Thanzeel5";
+    email = "thanzeelhassan5@gmail.com";
+    phone = "6235611195";
+    password = "password";
     const result =
-      await sql`INSERT INTO users (name, email, phone_number, password) VALUES ('Thanzeel8', 'thanzeelhass8@gmail.com', '6235611198', 'password');`;
+      await sql`INSERT INTO users (name, email, phone_number, password) VALUES (${user_name}, ${email}, ${phone}, ${password});`;
     console.log("result : ", result);
     console.log("length of result : ", result.length);
     if (result.length === 0) {
-      res.status(200).send("Registered user");
+      res
+        .status(200)
+        .send("Registered user " + user_name + " with email " + email);
     } else {
       res.status(400).send("Failed to register");
     }
