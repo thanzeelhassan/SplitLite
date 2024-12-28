@@ -29,25 +29,74 @@ const bcrypt = require("bcrypt");
 
 const sql = neon(process.env.DATABASE_URL);
 
-app.get("/register", async (req, res) => {
+app.post("/register", async (req, res) => {
   console.log("Registering");
   try {
     const { username, email, phone, password, confirmPassword } = req.body;
+    if (password !== confirmPassword) {
+      return res.status(400).send("Password and confirm password do not match");
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const result =
-      await sql`INSERT INTO users (name, email, phone_number, password) VALUES (${user_name}, ${email}, ${phone}, ${hashedPassword});`;
+      await sql`INSERT INTO users (name, email, phone_number, password) VALUES (${username}, ${email}, ${phone}, ${hashedPassword});`;
     console.log("result : ", result);
     console.log("length of result : ", result.length);
     if (result.length === 0) {
       res
         .status(200)
-        .send("Registered user " + user_name + " with email " + email);
+        .send("Registered user " + username + " with email " + email);
     } else {
       res.status(400).send("Failed to register");
     }
   } catch (err) {
     console.log(err);
-    res.status(400).send("Error");
+    res.status(400).send("An error occurred while processing your registration.");
+  }
+});
+
+app.delete("/delete", async (req, res) => {
+  console.log("Deleting user");
+  try {
+    const { username, email, phone, password } = req.body;
+
+    if (!username || !email || !phone || !password) {
+      return res
+        .status(400)
+        .send("Username, email, phone, and password are required");
+    }
+
+    const user = await sql`
+      SELECT password FROM users 
+      WHERE name = ${username} 
+        AND email = ${email} 
+        AND phone_number = ${phone};
+    `;
+    if (user.length === 0) {
+      return res.status(404).send("User not found");
+    }
+
+    const hashedPassword = user[0].password;
+    const isPasswordMatch = await bcrypt.compare(password, hashedPassword);
+    if (!isPasswordMatch) {
+      return res.status(401).send("Invalid credentials");
+    }
+
+    const result = await sql`
+      DELETE FROM users 
+      WHERE name = ${username} 
+        AND email = ${email} 
+        AND phone_number = ${phone};
+    `;
+
+    console.log(result);
+    if (result.length === 0) {
+      res.status(200).send(`Deleted user ${username}`);
+    } else {
+      res.status(400).send("Failed to delete user");
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting user");
   }
 });
 
@@ -56,25 +105,18 @@ app.post("/login", async (req, res) => {
   try {
     console.log(req.body);
     const { email, password } = req.body;
-
     if (!email || !password) {
       return res.status(400).send("Email and password are required.");
     }
-
     const result = await sql`SELECT * FROM users WHERE email = ${email}`;
-
     if (result.length === 0) {
       return res.status(404).send("User not found.");
     }
-
     const user = result[0];
-
     const isPasswordValid = await bcrypt.compare(password, user.password);
-
     if (!isPasswordValid) {
       return res.status(401).send("Invalid password.");
     }
-
     res.status(200).send(`Welcome back, ${user.name}!`);
   } catch (err) {
     console.error(err);
