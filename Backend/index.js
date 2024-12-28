@@ -42,8 +42,14 @@ app.post("/register", async (req, res) => {
       return res.status(400).send("Password and confirm password do not match");
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const result =
-      await sql`INSERT INTO users (name, email, phone_number, password) VALUES (${username}, ${email}, ${phone}, ${hashedPassword});`;
+    let result;
+    if (phone) {
+      result =
+        await sql`INSERT INTO users (name, email, phone_number, password) VALUES (${username}, ${email}, ${phone}, ${hashedPassword});`;
+    } else {
+      result =
+        await sql`INSERT INTO users (name, email, password) VALUES (${username}, ${email}, ${hashedPassword});`;
+    }
     console.log("result : ", result);
     console.log("length of result : ", result.length);
     if (result.length === 0) {
