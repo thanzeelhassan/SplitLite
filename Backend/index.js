@@ -153,7 +153,14 @@ app.post("/login", async (req, res) => {
       sameSite: "strict", // Helps prevent CSRF attacks
     });
 
-    res.status(200).send(`Welcome back, ${user.name}!`);
+    res.status(200).json({
+      message: `Welcome back, ${user.name}!`,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).send("An error occurred while processing your login.");
