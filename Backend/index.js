@@ -4,6 +4,11 @@ const app = express();
 
 app.use(express.json());
 
+const cookieParser = require("cookie-parser");
+
+// Middleware for parsing cookies
+app.use(cookieParser());
+
 app.use(
   cors({
     origin: "http://localhost:5173", // React app's URL
@@ -50,7 +55,9 @@ app.post("/register", async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.status(400).send("An error occurred while processing your registration.");
+    res
+      .status(400)
+      .send("An error occurred while processing your registration.");
   }
 });
 
@@ -100,23 +107,46 @@ app.delete("/delete", async (req, res) => {
   }
 });
 
+const jwt = require("jsonwebtoken");
+
+const JWT_SECRET = "HdZXv90sPpwccnGbVGotaIVdAlk9SW39";
+const JWT_EXPIRATION = "1h";
+
 app.post("/login", async (req, res) => {
   console.log("Login");
   try {
-    console.log(req.body);
     const { email, password } = req.body;
+
     if (!email || !password) {
       return res.status(400).send("Email and password are required.");
     }
+
     const result = await sql`SELECT * FROM users WHERE email = ${email}`;
     if (result.length === 0) {
       return res.status(404).send("User not found.");
     }
+
     const user = result[0];
     const isPasswordValid = await bcrypt.compare(password, user.password);
+
     if (!isPasswordValid) {
       return res.status(401).send("Invalid password.");
     }
+
+    // Generate a JWT token
+    const token = jwt.sign(
+      { id: user.id, email: user.email, name: user.name }, // Payload
+      JWT_SECRET, // Secret key
+      { expiresIn: JWT_EXPIRATION } // Token expiration
+    );
+
+    // Set token as an HTTP-only cookie
+    res.cookie("authToken", token, {
+      httpOnly: true, // Prevents client-side scripts from accessing the cookie
+      secure: process.env.NODE_ENV === "production", // Ensures cookies are sent over HTTPS in production
+      sameSite: "strict", // Helps prevent CSRF attacks
+    });
+
     res.status(200).send(`Welcome back, ${user.name}!`);
   } catch (err) {
     console.error(err);
@@ -132,4 +162,29 @@ app.get("/users", async (req, res) => {
   res.writeHead(200, { "Content-Type": "text/plain" });
   res.write("Number of users in the database : ");
   res.end(count);
+});
+
+function authenticateToken(req, res, next) {
+  const token = req.cookies.authToken;
+
+  if (!token) {
+    return res.status(401).send("Access denied. No token provided.");
+  }
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded; // Attach user data to the request
+    next(); // Proceed to the next middleware or endpoint
+  } catch (err) {
+    res.status(403).send("Invalid or expired token.");
+  }
+}
+
+app.get("/protected", authenticateToken, (req, res) => {
+  res.status(200).send(`Hello, ${req.user.name}. You are authorized!`);
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("authToken");
+  res.status(200).send("Logged out successfully.");
 });
