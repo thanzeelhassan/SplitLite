@@ -12,6 +12,7 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: "http://localhost:5173", // React app's URL
+    credentials: true, // Allow cookies and authentication headers
   })
 );
 
@@ -194,7 +195,10 @@ function authenticateToken(req, res, next) {
 }
 
 app.get("/protected", authenticateToken, (req, res) => {
-  res.status(200).send(`Hello, ${req.user.name}. You are authorized!`);
+  res.status(200).json({
+    message: `Hello, ${req.user.name}. You are authorized!`,
+    user: req.user, // Optionally include more user data
+  });
 });
 
 app.post("/logout", (req, res) => {
