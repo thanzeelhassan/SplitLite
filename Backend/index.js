@@ -154,6 +154,7 @@ app.post("/login", async (req, res) => {
       sameSite: "strict", // Helps prevent CSRF attacks
     });
 
+    // Return token in both cookie and body
     res.status(200).json({
       message: `Welcome back, ${user.name}!`,
       user: {
@@ -161,6 +162,7 @@ app.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
       },
+      authToken: token, // Include the token in the response body
     });
   } catch (err) {
     console.error(err);
@@ -179,7 +181,12 @@ app.get("/users", async (req, res) => {
 });
 
 function authenticateToken(req, res, next) {
-  const token = req.cookies.authToken;
+  // Retrieve the token from cookies, body, query, or headers
+  const token =
+    req.cookies.authToken || 
+    req.body.authToken || 
+    req.query.authToken || 
+    req.headers["authorization"]?.split(" ")[1]; // Bearer token format
 
   if (!token) {
     return res.status(401).send("Access denied. No token provided.");
