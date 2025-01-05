@@ -162,7 +162,7 @@ app.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
       },
-      authToken: token, // Include the token in the response body
+      token, // Include the token in the response body
     });
   } catch (err) {
     console.error(err);
@@ -183,9 +183,9 @@ app.get("/users", async (req, res) => {
 function authenticateToken(req, res, next) {
   // Retrieve the token from cookies, body, query, or headers
   const token =
-    req.cookies.authToken || 
-    req.body.authToken || 
-    req.query.authToken || 
+    req.cookies.authToken ||
+    req.body.authToken ||
+    req.query.authToken ||
     req.headers["authorization"]?.split(" ")[1]; // Bearer token format
 
   if (!token) {
