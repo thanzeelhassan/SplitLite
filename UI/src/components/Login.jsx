@@ -1,8 +1,26 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Banner from "./Banner";
 import ToastContainerComponent from "./Toasts";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-function Login({ onLogin }) {
+const baseUrl = import.meta.env.VITE_API_URL;
+
+function Login() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    try {
+      const token = localStorage.getItem("authToken");
+      const decoded = JSON.parse(atob(token.split(".")[1])); // Decode JWT
+      if (decoded.exp * 1000 > Date.now()) {
+        console.log("Navigating to dashboard");
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      console.log("Improper token");
+    }
+  }, [navigate]);
+
   const [loginDetails, setLoginDetails] = useState({
     email: "",
     password: "",
@@ -18,10 +36,32 @@ function Login({ onLogin }) {
       };
     });
   }
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     setButtonDisabled(true);
-    onLogin(loginDetails);
+    try {
+      const response = await fetch(`${baseUrl}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(loginDetails),
+      });
+      console.log(`Response status: ${response.status}`);
+      if (response.ok) {
+        var data = await response.json();
+        localStorage.setItem("authToken", data.token); // Store token in local storage
+        navigate("/dashboard");
+      } else {
+        const errorData = await response.json();
+        toast.error(
+          errorData.message || "Something went wrong. Please try again."
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong. Please try again.");
+    }
     setButtonDisabled(false);
   }
 
