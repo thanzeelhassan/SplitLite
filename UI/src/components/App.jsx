@@ -75,8 +75,9 @@ function App() {
       console.log(`Response status: ${response.status}`);
       console.log(`Response: ${response.ok}`);
       if (response.ok) {
-        // const data = await response.json();
-        // console.log(`Data: ${data}`);
+        var data = await response.json();
+        localStorage.setItem("authToken", data.authToken); // Store token in local storage
+        console.log(data.authToken);
         setIsAuthenticated(true);
       } else {
         const errorData = await response.json();
@@ -109,6 +110,7 @@ function App() {
             isAuthenticated ? <Dashboard /> : <Navigate to="/" replace />
           }
         />
+        <Route path="/dashboarddev" element={<Dashboard />} />
         <Route path="/register" element={<Register />} />
       </Routes>
     </Router>
