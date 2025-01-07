@@ -18,10 +18,12 @@ app.use(
 // Routes
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/user");
+const groupRoutes = require("./routes/group");
 
 // Use routes
 app.use("/", authRoutes);
 app.use("/", userRoutes);
+app.use("/", groupRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to SplitLite");
