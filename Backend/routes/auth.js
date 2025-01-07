@@ -88,4 +88,12 @@ router.post("/logout", (req, res) => {
   res.status(200).send("Logged out successfully.");
 });
 
+//protected
+router.get("/protected", authenticateToken, (req, res) => {
+  res.status(200).json({
+    message: `Hello, ${req.user.name}. You are authorized!`,
+    user: req.user, // Optionally include more user data
+  });
+});
+
 module.exports = router;
