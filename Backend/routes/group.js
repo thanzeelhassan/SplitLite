@@ -7,7 +7,7 @@ const router = express.Router();
 // Create a new group
 router.post("/groups", authenticateToken, async (req, res) => {
   try {
-    console.log(req);
+    console.log(req.user);
     const { name, description } = req.body;
 
     // Validate input
@@ -21,7 +21,7 @@ router.post("/groups", authenticateToken, async (req, res) => {
     // Insert the group into the database
     const result = await sql`
       INSERT INTO groups (name, description, created_by, created_at)
-      VALUES (${name}, ${groupDescription}, ${req.user.id}, NOW())
+      VALUES (${name}, ${groupDescription}, ${req.user.user_id}, NOW())
       RETURNING group_id, name, description, created_by, created_at;
     `;
 

@@ -60,7 +60,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user.id, email: user.email, name: user.name },
+      { user_id: user.user_id, email: user.email, name: user.name },
       JWT_SECRET,
       { expiresIn: JWT_EXPIRATION }
     );
@@ -73,7 +73,7 @@ router.post("/login", async (req, res) => {
 
     res.status(200).json({
       message: `Welcome back, ${user.name}!`,
-      user: { id: user.id, name: user.name, email: user.email },
+      user: { user_id: user.user_id, name: user.name, email: user.email },
       token,
     });
   } catch (err) {
@@ -90,6 +90,7 @@ router.post("/logout", (req, res) => {
 
 //protected
 router.get("/protected", authenticateToken, (req, res) => {
+  console.log("req.user : ", req.user);
   res.status(200).json({
     message: `Hello, ${req.user.name}. You are authorized!`,
     user: req.user, // Optionally include more user data
