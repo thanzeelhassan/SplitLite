@@ -89,7 +89,7 @@ body {
 }
 .nav-bar ul {
   list-style-type: none;
-  padding-left: 20px;
+  padding-left: 0px;
 }
 
 .nav-bar li a {
@@ -103,4 +103,15 @@ body {
 .nav-bar li a:hover {
   background-color: #555;
   color: white;
+}
+
+.nav-bar .active {
+  background-color: #079a98;
+  color: white;
+}
+
+.greeting {
+  margin-right: 20px;
+  margin-left: auto;
+  float: right;
 }
