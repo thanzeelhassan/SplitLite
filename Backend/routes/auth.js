@@ -29,9 +29,9 @@ router.post('/register', async (req, res) => {
                 await sql`INSERT INTO users (name, email, password) VALUES (${username}, ${email}, ${hashedPassword});`;
         }
         if (result.length === 0) {
-            res.status(200).send(
-                `Registered user ${username} with email ${email}`
-            );
+            res.status(200).json({
+                message: `Registered user ${username} with email ${email}`,
+            });
         } else {
             res.status(400).send('Failed to register');
         }
@@ -89,7 +89,9 @@ router.post('/login', async (req, res) => {
 // Logout
 router.post('/logout', (req, res) => {
     res.clearCookie('authToken');
-    res.status(200).send('Logged out successfully.');
+    res.status(200).json({
+        message: 'Logged out successfully.',
+    });
 });
 
 //protected
