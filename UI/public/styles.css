@@ -78,11 +78,29 @@ body {
 .nav-bar {
   margin: 0;
   padding: 0;
-  width: 25%;
+  width: 25%; /* Sidebar width */
   background-color: #f1f1f1;
   height: 100%; /* Full height */
-  position: fixed; /* Make it stick, even on scroll */
-  overflow: auto; /* Enable scrolling if the sidenav has too much content */
+  position: fixed; /* Fixed positioning */
+  overflow: auto; /* Scroll if needed */
+}
+
+.content {
+  margin-left: 25%; /* Push content to the right of the navbar */
+  padding: 20px; /* Add some padding for better spacing */
+}
+
+.profile-details {
+  background: #ffffff; /* White background for contrast */
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.greeting {
+  margin-right: 20px;
+  margin-left: auto;
+  float: right;
 }
 .nav-bar h1 {
   padding-left: 20px;
