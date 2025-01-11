@@ -11,7 +11,7 @@ function Profile(props) {
         <strong>Email:</strong> {props.profileDetails.email}
       </p>
       <p>
-        <strong>User ID:</strong> {props.profileDetails.user_id}
+        <strong>Phone:</strong> {props.profileDetails.phone}
       </p>
     </div>
   );

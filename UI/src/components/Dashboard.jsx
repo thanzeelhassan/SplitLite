@@ -49,6 +49,7 @@ function Dashboard() {
           return {
             userName: data.user.name,
             email: data.user.email,
+            phone: data.user.phone,
           };
         }); // Save data in state
       } catch (error) {
