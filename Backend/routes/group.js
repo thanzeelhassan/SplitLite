@@ -40,4 +40,30 @@ router.post("/groups", authenticateToken, async (req, res) => {
   }
 });
 
+// Get all groups a user is part of
+router.get("/groups", authenticateToken, async (req, res) => {
+  try {
+    // Fetch all groups the user is part of
+    const result = await sql`
+      SELECT g.group_id, g.name, g.description, g.created_by, g.created_at
+      FROM groups g
+      INNER JOIN groupmembers gm ON g.group_id = gm.group_id
+      WHERE gm.user_id = ${req.user.user_id}
+      ORDER BY g.created_at DESC;
+    `;
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: "No groups found." });
+    }
+
+    res.status(200).json({
+      message: "Groups retrieved successfully.",
+      groups: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred while fetching the groups.");
+  }
+});
+
 module.exports = router;
