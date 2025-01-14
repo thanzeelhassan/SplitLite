@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Banner from "./Banner";
 import ToastContainerComponent from "./Toasts";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
+import { motion } from "framer-motion";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -66,7 +67,12 @@ function Login() {
   }
 
   return (
-    <div className="login-container">
+    <motion.div
+      className="login-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
       <Banner />
       <div className="login-form">
         <form onSubmit={handleSubmit}>
@@ -91,12 +97,12 @@ function Login() {
           </button>
           <hr />
           <p>
-            Do not have an account? <a href="/register">Sign up</a>
+            Do not have an account? <Link to="/register">Sign up</Link>
           </p>
         </form>
       </div>
       <ToastContainerComponent />
-    </div>
+    </motion.div>
   );
 }
 

@@ -4,6 +4,7 @@ import ToastContainerComponent from "./Toasts";
 import { toast } from "react-toastify";
 import Greeting from "./Greeting";
 import Profile from "./Profile";
+import { motion } from "framer-motion";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -172,7 +173,11 @@ function Dashboard() {
   }
 
   return (
-    <div>
+    <motion.div
+      intial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
       <ToastContainerComponent />
       <Greeting name={profileDetails.userName} />
       <div className="nav-bar">
@@ -197,7 +202,7 @@ function Dashboard() {
           <Profile profileDetails={profileDetails} />
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
