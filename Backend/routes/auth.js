@@ -11,7 +11,6 @@ const JWT_EXPIRATION = '1h';
 
 // Register
 router.post('/register', async (req, res) => {
-    console.log('Registering');
     try {
         const { username, email, phone, password, confirmPassword } = req.body;
         if (password !== confirmPassword) {
@@ -43,7 +42,6 @@ router.post('/register', async (req, res) => {
 
 // Login
 router.post('/login', async (req, res) => {
-    console.log('Login');
     try {
         const { email, password } = req.body;
 
