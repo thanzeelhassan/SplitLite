@@ -18,7 +18,6 @@ router.post("/groups", authenticateToken, async (req, res) => {
     // Default empty description if not provided
     const groupDescription = description ? description.trim() : null;
 
-    // Insert the group into the database
     const result = await sql`
       INSERT INTO groups (name, description, created_by, created_at)
       VALUES (${name}, ${groupDescription}, ${req.user.user_id}, NOW())
@@ -72,7 +71,6 @@ router.post("/groupmembers", authenticateToken, async (req, res) => {
     console.log(req.user);
     const { group_id, user_id } = req.body;
 
-    // Insert the group into the database
     const result = await sql`
       INSERT INTO groupmembers (group_id, user_id)
       VALUES (${group_id}, ${user_id})
