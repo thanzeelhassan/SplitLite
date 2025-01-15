@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import Greeting from "./Greeting";
 import Profile from "./Profile";
 import { motion } from "framer-motion";
+import Groups from "./Groups";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -16,6 +17,8 @@ function Dashboard() {
     email: "",
     phone: "",
   });
+
+  const [groupsDetails, setGroupsDetails] = useState([])
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -61,7 +64,34 @@ function Dashboard() {
       }
     };
 
+    const fetchGroupsDetails = async () => {
+      try {
+        setLoading(true); // Start loading
+        const token = localStorage.getItem("authToken");
+
+        const response = await fetch(`${baseUrl}/groups`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          toast.error(errorData.message || "Failed to load group details.");
+        }
+        const data = await response.json();
+        setGroupsDetails(data.groups);
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Something went wrong. Please try again.");
+      } finally {
+        setLoading(false); // End loading
+      }
+    };
+
     fetchProfileDetails();
+    fetchGroupsDetails();
   }, []); // Empty dependency array ensures this runs only once after the first render
 
   if (loading) return <p>Loading...</p>; // Show a loading message
@@ -183,7 +213,7 @@ function Dashboard() {
       <div className="nav-bar">
         <h1>SplitLite</h1>
         <ul>
-          {["profile", "groups", "logout"].map((item) => (
+          {["home", "profile", "groups", "logout"].map((item) => (
             <li key={item}>
               <a
                 href={`#${item}`}
@@ -200,6 +230,9 @@ function Dashboard() {
       <div className="content">
         {activeNavItem === "profile" && (
           <Profile profileDetails={profileDetails} />
+        )}
+        {activeNavItem === "groups" && (
+          <Groups groupsDetails={groupsDetails} />
         )}
       </div>
     </motion.div>

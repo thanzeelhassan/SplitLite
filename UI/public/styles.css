@@ -92,16 +92,12 @@ body {
 
 .profile-details {
   background: #ffffff; /* White background for contrast */
+  margin-top: 40px;
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.greeting {
-  margin-right: 20px;
-  margin-left: auto;
-  float: right;
-}
 .nav-bar h1 {
   padding-left: 20px;
   color: #079a98;
@@ -130,6 +126,9 @@ body {
 }
 
 .greeting {
+  margin-top: 20px;
+  margin-bottom: 20px;
   margin-right: 20px;
   margin-left: auto;
+  float: right;
 }
