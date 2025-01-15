@@ -1,18 +1,26 @@
-import React from "react";
-import { useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import React from 'react';
+import { motion } from 'framer-motion';
 
-const GroupDetails = () => {
-  const { groupId } = useParams();
-
-  return (
-    <motion.div>
-      <h2>Details for Group ID: {groupId}</h2>
-      {/* Fetch and display group details using the groupId */}
-      {/* Example: */}
-      {/* You can use groupId to fetch group data if necessary */}
-    </motion.div>
-  );
-};
+function GroupDetails({ group, onBackClick }) {
+    return (
+        <motion.div className="group-detail-view">
+            <button onClick={onBackClick}>Back to Groups</button>
+            <h2>{group.name}</h2>
+            <p>
+                <strong>Description:</strong> {group.description}
+            </p>
+            <p>
+                <strong>Created By:</strong> {group.created_by || 'N/A'}
+            </p>
+            <p>
+                <strong>Created At:</strong>{' '}
+                {new Date(group.created_at).toLocaleString()}
+            </p>
+            <h2>Members</h2>
+            <h2>Expenses</h2>
+            <h2>Settlements</h2>
+        </motion.div>
+    );
+}
 
 export default GroupDetails;

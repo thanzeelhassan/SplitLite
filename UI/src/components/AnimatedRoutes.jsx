@@ -7,6 +7,7 @@ import Home from './Home';
 import RouteProtection from './RouteProtection';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import Groups from './Groups';
 
 function AnimatedRoutes() {
     const location = useLocation();
@@ -38,6 +39,14 @@ function AnimatedRoutes() {
                     element={
                         <RouteProtection>
                             <Dashboard />
+                        </RouteProtection>
+                    }
+                />
+                <Route
+                    path="/group"
+                    element={
+                        <RouteProtection>
+                            <Group />
                         </RouteProtection>
                     }
                 />
