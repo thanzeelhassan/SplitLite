@@ -96,69 +96,6 @@ function Dashboard() {
 
   if (loading) return <p>Loading...</p>; // Show a loading message
 
-  // useEffect(() => {
-  //   const fetchProtectedData = async () => {
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-
-  //       const response = await fetch(`${baseUrl}/protected`, {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-
-  //       if (response.ok) {
-  //         const data = await response.json();
-  //         setUser(data.user); // Set the user object with the decoded user data
-  //         toast.success(`Welcome back, ${data.user.name}!`); // Show welcome message as a toast
-  //       } else {
-  //         const errorData = await response.json();
-  //         toast.error(
-  //           errorData.message || "Access denied. Please log in again."
-  //         );
-  //         setUser(null);
-  //         navigate("/"); // Navigate to login page
-  //       }
-  //     } catch (error) {
-  //       console.error("Error:", error);
-  //       toast.error("Something went wrong. Please try again.");
-  //       setUser(null);
-  //       navigate("/"); // Navigate to login page
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchProtectedData();
-  // }, [navigate]);
-
-  // const fetchProfileDetails = async () => {
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     const response = await fetch(`${baseUrl}/profile`, {
-  //       method: "GET",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       setProfileDetails(data.user);
-  //     } else {
-  //       const errorData = await response.json();
-  //       toast.error(errorData.message || "Failed to load profile details.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //     toast.error("Something went wrong. Please try again.");
-  //   }
-  // };
-
   const handleLogout = async () => {
     try {
       const token = localStorage.getItem("authToken");
@@ -204,9 +141,10 @@ function Dashboard() {
 
   return (
     <motion.div
-      intial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
     >
       <ToastContainerComponent />
       <Greeting name={profileDetails.userName} />

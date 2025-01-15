@@ -1,19 +1,19 @@
 import React from "react";
 import { motion } from "framer-motion";
-import "../../public/styles.css"; // Add custom CSS for styling
+import "../../public/styles.css";
 
 function Groups({ groupsDetails }) {
   const handleCardClick = (groupId) => {
-    // Navigate to a new page (replace with your routing logic)
-    window.location.href = `/groups/${groupId}`;
+    window.location.href = `/dashboard#groups`;
   };
 
   return (
     <motion.div
       className="groups-container"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
     >
       <h2>Group Details</h2>
 
