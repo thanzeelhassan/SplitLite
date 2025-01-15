@@ -4,6 +4,8 @@ import ToastContainerComponent from "./Toasts";
 import { toast } from "react-toastify";
 import Greeting from "./Greeting";
 import Profile from "./Profile";
+import { motion } from "framer-motion";
+import Groups from "./Groups";
 import Logo from "./Logo";
 
 const baseUrl = import.meta.env.VITE_API_URL;
@@ -16,6 +18,8 @@ function Dashboard() {
     email: "",
     phone: "",
   });
+
+  const [groupsDetails, setGroupsDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -50,6 +54,7 @@ function Dashboard() {
           return {
             userName: data.user.name,
             email: data.user.email,
+            phone: data.user.phone,
           };
         }); // Save data in state
       } catch (error) {
@@ -60,73 +65,37 @@ function Dashboard() {
       }
     };
 
+    const fetchGroupsDetails = async () => {
+      try {
+        setLoading(true); // Start loading
+        const token = localStorage.getItem("authToken");
+
+        const response = await fetch(`${baseUrl}/groups`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          toast.error(errorData.message || "Failed to load group details.");
+        }
+        const data = await response.json();
+        setGroupsDetails(data.groups);
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Something went wrong. Please try again.");
+      } finally {
+        setLoading(false); // End loading
+      }
+    };
+
     fetchProfileDetails();
+    fetchGroupsDetails();
   }, []); // Empty dependency array ensures this runs only once after the first render
 
   if (loading) return <p>Loading...</p>; // Show a loading message
-
-  // useEffect(() => {
-  //   const fetchProtectedData = async () => {
-  //     try {
-  //       const token = localStorage.getItem("authToken");
-
-  //       const response = await fetch(`${baseUrl}/protected`, {
-  //         method: "GET",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       });
-
-  //       if (response.ok) {
-  //         const data = await response.json();
-  //         setUser(data.user); // Set the user object with the decoded user data
-  //         toast.success(`Welcome back, ${data.user.name}!`); // Show welcome message as a toast
-  //       } else {
-  //         const errorData = await response.json();
-  //         toast.error(
-  //           errorData.message || "Access denied. Please log in again."
-  //         );
-  //         setUser(null);
-  //         navigate("/"); // Navigate to login page
-  //       }
-  //     } catch (error) {
-  //       console.error("Error:", error);
-  //       toast.error("Something went wrong. Please try again.");
-  //       setUser(null);
-  //       navigate("/"); // Navigate to login page
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchProtectedData();
-  // }, [navigate]);
-
-  // const fetchProfileDetails = async () => {
-  //   try {
-  //     const token = localStorage.getItem("authToken");
-
-  //     const response = await fetch(`${baseUrl}/profile`, {
-  //       method: "GET",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-
-  //     if (response.ok) {
-  //       const data = await response.json();
-  //       setProfileDetails(data.user);
-  //     } else {
-  //       const errorData = await response.json();
-  //       toast.error(errorData.message || "Failed to load profile details.");
-  //     }
-  //   } catch (error) {
-  //     console.error("Error:", error);
-  //     toast.error("Something went wrong. Please try again.");
-  //   }
-  // };
 
   const handleLogout = async () => {
     try {
@@ -172,13 +141,18 @@ function Dashboard() {
   }
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
+    >
       <ToastContainerComponent />
       <Greeting name={profileDetails.userName} />
       <div className="nav-bar">
         <h1>SplitLite</h1>
         <ul>
-          {["profile", "groups", "logout"].map((item) => (
+          {["home", "profile", "groups", "logout"].map((item) => (
             <li key={item}>
               <a
                 href={`#${item}`}
@@ -196,8 +170,9 @@ function Dashboard() {
         {activeNavItem === "profile" && (
           <Profile profileDetails={profileDetails} />
         )}
+        {activeNavItem === "groups" && <Groups groupsDetails={groupsDetails} />}
       </div>
-    </div>
+    </motion.div>
   );
 }
 

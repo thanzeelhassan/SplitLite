@@ -11,7 +11,6 @@ const JWT_EXPIRATION = '1h';
 
 // Register
 router.post('/register', async (req, res) => {
-    console.log('Registering');
     try {
         const { username, email, phone, password, confirmPassword } = req.body;
         if (password !== confirmPassword) {
@@ -43,7 +42,6 @@ router.post('/register', async (req, res) => {
 
 // Login
 router.post('/login', async (req, res) => {
-    console.log('Login');
     try {
         const { email, password } = req.body;
 
@@ -64,7 +62,7 @@ router.post('/login', async (req, res) => {
         }
 
         const token = jwt.sign(
-            { user_id: user.user_id, email: user.email, name: user.name },
+            { user_id: user.user_id, email: user.email, name: user.name, phone: user.phone_number },
             JWT_SECRET,
             { expiresIn: JWT_EXPIRATION }
         );
@@ -77,7 +75,7 @@ router.post('/login', async (req, res) => {
 
         res.status(200).json({
             message: `Welcome back, ${user.name}!`,
-            user: { user_id: user.user_id, name: user.name, email: user.email },
+            user: { user_id: user.user_id, name: user.name, email: user.email, phone: user.phone_number },
             token,
         });
     } catch (err) {

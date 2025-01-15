@@ -92,16 +92,12 @@ body {
 
 .profile-details {
   background: #ffffff; /* White background for contrast */
+  margin-top: 40px;
   padding: 20px;
   border-radius: 5px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.greeting {
-  margin-right: 20px;
-  margin-left: auto;
-  float: right;
-}
 .nav-bar h1 {
   padding-left: 20px;
   color: #079a98;
@@ -130,8 +126,50 @@ body {
 }
 
 .greeting {
+  margin-top: 20px;
+  margin-bottom: 20px;
   margin-right: 20px;
   margin-left: auto;
+  float: right;
+}
+
+.groups-container {
+  padding: 20px;
+}
+
+.groups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.group-card {
+  background: #f1f1f1;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.group-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.group-card h3 {
+  margin: 0 0 10px;
+  color: #079a98;
+}
+
+.group-card p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.group-card strong {
+  color: #555;
 }
 
 .logo-round-image {

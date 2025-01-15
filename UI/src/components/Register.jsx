@@ -3,6 +3,7 @@ import Banner from "./Banner";
 import { toast } from "react-toastify";
 import ToastContainerComponent from "./Toasts";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 console.log(`API Base URL ${baseUrl}`);
@@ -72,7 +73,13 @@ function Register() {
     setButtonDisabled(false);
   }
   return (
-    <div className="login-container">
+    <motion.div
+      className="login-container"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
+    >
       <Banner />
       <div className="login-form register-form">
         <form onSubmit={handleSubmit}>
@@ -126,7 +133,7 @@ function Register() {
         </form>
       </div>
       <ToastContainerComponent />
-    </div>
+    </motion.div>
   );
 }
 

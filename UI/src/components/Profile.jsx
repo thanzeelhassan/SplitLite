@@ -1,8 +1,15 @@
 import React from "react";
+import { motion } from "framer-motion";
 
 function Profile(props) {
   return (
-    <div className="profile-details">
+    <motion.div
+      className="profile-details"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.5 }}
+    >
       <h2>Profile Details</h2>
       <p>
         <strong>Name:</strong> {props.profileDetails.userName}
@@ -11,9 +18,9 @@ function Profile(props) {
         <strong>Email:</strong> {props.profileDetails.email}
       </p>
       <p>
-        <strong>User ID:</strong> {props.profileDetails.user_id}
+        <strong>Phone:</strong> {props.profileDetails.phone}
       </p>
-    </div>
+    </motion.div>
   );
 }
 
