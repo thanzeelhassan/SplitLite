@@ -4,6 +4,7 @@ import ToastContainerComponent from "./Toasts";
 import { toast } from "react-toastify";
 import Greeting from "./Greeting";
 import Profile from "./Profile";
+import Logo from "./Logo";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
