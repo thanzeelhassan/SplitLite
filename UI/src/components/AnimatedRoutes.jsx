@@ -46,7 +46,7 @@ function AnimatedRoutes() {
                     path="/group"
                     element={
                         <RouteProtection>
-                            <Group />
+                            <Groups />
                         </RouteProtection>
                     }
                 />
