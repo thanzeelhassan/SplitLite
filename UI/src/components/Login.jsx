@@ -12,10 +12,12 @@ function Login() {
   useEffect(() => {
     try {
       const token = localStorage.getItem("authToken");
-      const decoded = JSON.parse(atob(token.split(".")[1])); // Decode JWT
-      if (decoded.exp * 1000 > Date.now()) {
-        console.log("Navigating to dashboard");
-        navigate("/dashboard");
+      if (token) {
+        const decoded = JSON.parse(atob(token.split(".")[1])); // Decode JWT
+        if (decoded.exp * 1000 > Date.now()) {
+          console.log("Navigating to dashboard");
+          navigate("/dashboard");
+        }
       }
     } catch (error) {
       console.log("Improper token");
@@ -67,15 +69,15 @@ function Login() {
   }
 
   return (
-    <motion.div
-      className="login-container"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className="login-container">
       <Banner />
-      <div className="login-form">
+      <motion.div
+        className="login-form"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        //exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.5 }}
+      >
         <form onSubmit={handleSubmit}>
           <input
             type="email"
@@ -101,9 +103,9 @@ function Login() {
             Do not have an account? <Link to="/register">Sign up</Link>
           </p>
         </form>
-      </div>
+      </motion.div>
       <ToastContainerComponent />
-    </motion.div>
+    </div>
   );
 }
 
