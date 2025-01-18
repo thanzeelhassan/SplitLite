@@ -117,8 +117,7 @@ function GroupDetails({ group, onBackClick }) {
         {expenses.length > 0 ? (
           expenses.map((expense) => (
             <li key={expense.id}>
-              {expense.description} - {expense.amount} paid by {expense.paid_by}
-              
+              {expense.amount} paid by {expense.name} | Description : {expense.description}
             </li>
           ))
         ) : (
@@ -131,7 +130,7 @@ function GroupDetails({ group, onBackClick }) {
         {settlements.length > 0 ? (
           settlements.map((settlement) => (
             <li key={settlement.id}>
-              {settlement.payer_id} paid {settlement.payee_id} - {settlement.amount}{" "}
+              {settlement.name_payer} paid {settlement.name_payee} - {settlement.amount}{" "}
             </li>
           ))
         ) : (
