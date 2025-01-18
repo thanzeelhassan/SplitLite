@@ -44,9 +44,10 @@ router.get("/groups", authenticateToken, async (req, res) => {
   try {
     // Fetch all groups the user is part of
     const result = await sql`
-      SELECT g.group_id, g.name, g.description, g.created_by, g.created_at
+      SELECT g.group_id, g.name, g.description, u.name as created_by, g.created_at 
       FROM groups g
       INNER JOIN groupmembers gm ON g.group_id = gm.group_id
+      INNER JOIN users u ON gm.user_id = u.user_id
       WHERE gm.user_id = ${req.user.user_id}
       ORDER BY g.created_at DESC;
     `;
