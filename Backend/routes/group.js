@@ -65,7 +65,7 @@ router.get("/groups", authenticateToken, async (req, res) => {
   }
 });
 
-// Create a new group
+// Add a user into groupmembers table
 router.post("/groupmembers", authenticateToken, async (req, res) => {
   try {
     console.log(req.user);
