@@ -144,7 +144,7 @@ body {
 }
 
 .group-card {
-  background: #f1f1f1;
+  background: #ffffff;
   border: 1px solid #d0d7de;
   border-radius: 8px;
   padding: 20px;
@@ -158,8 +158,17 @@ body {
 }
 
 .group-card h3 {
-  margin: 0 0 10px;
+  margin-bottom: 2px;
   color: #079a98;
+}
+.group-card .date {
+  margin-bottom: 10px;
+  margin-top: 0px;
+  color: #555;
+  font-size: 0.75rem;
+}
+.group-card .balance {
+  font-weight: bold;
 }
 
 .group-card p {
@@ -175,4 +184,58 @@ body {
 .logo-round-image {
   border-radius: 50%;
   /* object-fit: cover;  Ensures the image fits properly */
+}
+
+.custom-button {
+  background-color: #079a98;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px; /* Initial padding for the button */
+  border-radius: 50px;
+
+  font-size: 30px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, padding 0.3s ease, width 0.3s ease; /* Smooth transition for background and padding */
+  position: fixed;
+  bottom: 40px;
+  right: 40px;
+  overflow: hidden;
+  height: 60px;
+  width: 60px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-button:hover {
+  background-color: #17bebb;
+  padding: 8px 24px; /* Increase padding on hover to accommodate text */
+  width: 180px;
+}
+
+.custom-button .icon,
+.custom-button .text {
+  position: absolute;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.custom-button .icon {
+  opacity: 1; /* Show icon by default */
+  transform: translateX(0); /* Default position */
+}
+
+.custom-button .text {
+  opacity: 0; /* Hide text by default */
+  transform: translateX(-20px); /* Slide text slightly left */
+  transition-delay: 0.1s;
+}
+
+.custom-button:hover .icon {
+  opacity: 0; /* Fade out icon on hover */
+  transform: translateX(20px); /* Slide icon slightly right */
+}
+
+.custom-button:hover .text {
+  opacity: 1; /* Fade in text on hover */
+  transform: translateX(0); /* Slide text into place */
 }

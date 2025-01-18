@@ -140,6 +140,31 @@ function Dashboard() {
     return <h1>Loading...</h1>;
   }
 
+  //Same API response
+  const groupsSample = [
+    {
+      group_id: 7,
+      name: "Kakkanad Boys",
+      balance: 250,
+      created_by: "Thanzeel",
+      created_at: "2025-01-14T00:14:48.210Z",
+    },
+    {
+      group_id: 2,
+      name: "Study Group",
+      balance: -1000,
+      created_by: "Kiran",
+      created_at: "2025-01-06T23:45:57.851Z",
+    },
+    {
+      group_id: 4,
+      name: "Bday Group",
+      balance: 0,
+      created_by: "Kiran",
+      created_at: "2025-01-06T23:45:57.851Z",
+    },
+  ];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
