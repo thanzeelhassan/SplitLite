@@ -44,9 +44,10 @@ router.get("/groups", authenticateToken, async (req, res) => {
   try {
     // Fetch all groups the user is part of
     const result = await sql`
-      SELECT g.group_id, g.name, g.description, g.created_by, g.created_at
+      SELECT g.group_id, g.name, g.description, u.name as created_by, g.created_at 
       FROM groups g
       INNER JOIN groupmembers gm ON g.group_id = gm.group_id
+      INNER JOIN users u ON gm.user_id = u.user_id
       WHERE gm.user_id = ${req.user.user_id}
       ORDER BY g.created_at DESC;
     `;
@@ -65,7 +66,7 @@ router.get("/groups", authenticateToken, async (req, res) => {
   }
 });
 
-// Create a new group
+// Add a user into groupmembers table
 router.post("/groupmembers", authenticateToken, async (req, res) => {
   try {
     console.log(req.user);
@@ -91,5 +92,98 @@ router.post("/groupmembers", authenticateToken, async (req, res) => {
     res.status(500).send("An error occurred while adding the group member.");
   }
 });
+
+// Get all members of a group
+router.get("/groups/:groupId/members", authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    const result = await sql`
+      SELECT u.user_id, u.name, u.email
+      FROM users u
+      INNER JOIN groupmembers gm ON u.user_id = gm.user_id
+      WHERE gm.group_id = ${groupId};
+    `;
+
+    if (result.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No members found for this group." });
+    }
+
+    res.status(200).json({
+      message: "Members retrieved successfully.",
+      members: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred while fetching group members.");
+  }
+});
+
+// Get all expenses of a group
+router.get("/groups/:groupId/expenses", authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    const result = await sql`
+      SELECT e.expense_id, e.paid_by, e.amount, e.description, e.created_at, u.name, u.user_id
+      FROM expenses e
+      INNER JOIN users u ON u.user_id = e.paid_by
+      WHERE e.group_id = ${groupId}
+      ORDER BY e.created_at DESC;
+    `;
+
+    if (result.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No expenses found for this group." });
+    }
+
+    res.status(200).json({
+      message: "Expenses retrieved successfully.",
+      expenses: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred while fetching group expenses.");
+  }
+});
+
+// Get all settlements of a group
+router.get(
+  "/groups/:groupId/settlements",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { groupId } = req.params;
+
+      const result = await sql`
+      SELECT s.settlement_id, s.payer_id, s.payee_id, s.amount, s.created_at, u.user_id as user_id_payer, u.name as name_payer, u2.user_id as user_id_payee, u2.name as name_payee
+      FROM settlements s
+      INNER JOIN users u ON u.user_id = s.payer_id
+      INNER JOIN users u2 ON u2.user_id = s.payee_id
+      WHERE s.group_id = ${groupId}
+      ORDER BY s.created_at DESC;
+    `;
+
+      if (result.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No settlements found for this group." });
+      }
+
+      res.status(200).json({
+        message: "Settlements retrieved successfully.",
+        settlements: result,
+      });
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .send("An error occurred while fetching group settlements.");
+    }
+  }
+);
 
 module.exports = router;
