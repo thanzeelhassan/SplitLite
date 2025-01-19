@@ -41,37 +41,35 @@ function Groups({ groupsDetails }) {
       </div>
     );
   }
-  return (
-    <motion.div
-      className="groups-container"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.5 }}
-    >
-      {selectedGroup ? (
-        <GroupDetails group={selectedGroup} onBackClick={handleBackClick} />
-      ) : (
-        <>
-          <h2>Groups</h2>
-          {groupsDetails && groupsDetails.length > 0 ? (
-            <div className="groups-grid">
-              {groupsDetails.map(createGroupCard)}
-            </div>
-          ) : (
-            <p>No groups available.</p>
-          )}
-          <button
-            className="custom-button"
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
-          >
-            <div className="icon">{hover ? null : "+"}</div>
-            <div className="text">{hover ? "Add Group" : null}</div>
-          </button>
-        </>
-      )}
-    </motion.div>
+  return selectedGroup ? (
+    <GroupDetails group={selectedGroup} onBackClick={handleBackClick} />
+  ) : (
+    <>
+      <motion.div
+        className="groups-container"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h2>Groups</h2>
+        {groupsDetails && groupsDetails.length > 0 ? (
+          <div className="groups-grid">
+            {groupsDetails.map(createGroupCard)}
+          </div>
+        ) : (
+          <p>No groups available.</p>
+        )}
+      </motion.div>
+      <button
+        className="custom-button"
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+      >
+        <div className="icon">{hover ? null : "+"}</div>
+        <div className="text">{hover ? "Add Group" : null}</div>
+      </button>
+    </>
   );
 }
 

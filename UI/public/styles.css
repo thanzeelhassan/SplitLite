@@ -192,13 +192,12 @@ body {
   border: none;
   padding: 8px 16px; /* Initial padding for the button */
   border-radius: 50px;
-
   font-size: 30px;
   cursor: pointer;
   transition: background-color 0.3s ease, padding 0.3s ease, width 0.3s ease; /* Smooth transition for background and padding */
-  position: fixed;
-  bottom: 40px;
-  right: 40px;
+  position: fixed !important;
+  bottom: 40px !important;
+  right: 40px !important;
   overflow: hidden;
   height: 60px;
   width: 60px;
