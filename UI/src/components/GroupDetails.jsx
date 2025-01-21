@@ -17,15 +17,15 @@ function GroupDetails({ group, onBackClick }) {
 
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [expenseDetails, setExpenseDetails] = useState({
-    paid_by: "",
+    paid_by_email: "",
     amount: "",
     description: "",
   });
 
   const [showAddSettlement, setShowAddSettlement] = useState(false);
   const [settlementDetails, setSettlementDetails] = useState({
-    payer_id: "",
-    payee_id: "",
+    payer_email: "",
+    payee_email: "",
     amount: "",
   });
 
@@ -78,13 +78,27 @@ function GroupDetails({ group, onBackClick }) {
   const handleAddExpense = async () => {
     try {
       setIsAdding(true);
+      setAddError(null);
       const token = localStorage.getItem("authToken");
-      await GroupService.addExpense(group.group_id, expenseDetails, token);
+
+      // Resolve email to user ID
+      const paidById = await GroupService.getUserIdByEmail(
+        expenseDetails.paid_by_email,
+        token
+      );
+
+      const expensePayload = {
+        paid_by: paidById,
+        amount: expenseDetails.amount,
+        description: expenseDetails.description,
+      };
+
+      await GroupService.addExpense(group.group_id, expensePayload, token);
 
       const updatedExpenses = await GroupService.fetchExpenses(group.group_id, token);
       setExpenses(updatedExpenses);
       setShowAddExpense(false);
-      setExpenseDetails({ paid_by: "", amount: "", description: "" });
+      setExpenseDetails({ paid_by_email: "", amount: "", description: "" });
     } catch (err) {
       setAddError(err.message);
     } finally {
@@ -95,8 +109,26 @@ function GroupDetails({ group, onBackClick }) {
   const handleAddSettlement = async () => {
     try {
       setIsAdding(true);
+      setAddError(null);
       const token = localStorage.getItem("authToken");
-      await GroupService.addSettlement(group.group_id, settlementDetails, token);
+
+      // Resolve payer and payee emails to user IDs
+      const payerId = await GroupService.getUserIdByEmail(
+        settlementDetails.payer_email,
+        token
+      );
+      const payeeId = await GroupService.getUserIdByEmail(
+        settlementDetails.payee_email,
+        token
+      );
+
+      const settlementPayload = {
+        payer_id: payerId,
+        payee_id: payeeId,
+        amount: settlementDetails.amount,
+      };
+
+      await GroupService.addSettlement(group.group_id, settlementPayload, token);
 
       const updatedSettlements = await GroupService.fetchSettlements(
         group.group_id,
@@ -104,7 +136,7 @@ function GroupDetails({ group, onBackClick }) {
       );
       setSettlements(updatedSettlements);
       setShowAddSettlement(false);
-      setSettlementDetails({ payer_id: "", payee_id: "", amount: "" });
+      setSettlementDetails({ payer_email: "", payee_email: "", amount: "" });
     } catch (err) {
       setAddError(err.message);
     } finally {
@@ -201,11 +233,11 @@ function GroupDetails({ group, onBackClick }) {
         <div className="modal">
           <h3>Add Expense</h3>
           <input
-            type="text"
-            placeholder="Paid By (User ID)"
-            value={expenseDetails.paid_by}
+            type="email"
+            placeholder="Paid By (User Email)"
+            value={expenseDetails.paid_by_email}
             onChange={(e) =>
-              setExpenseDetails({ ...expenseDetails, paid_by: e.target.value })
+              setExpenseDetails({ ...expenseDetails, paid_by_email: e.target.value })
             }
           />
           <input
@@ -237,19 +269,19 @@ function GroupDetails({ group, onBackClick }) {
         <div className="modal">
           <h3>Add Settlement</h3>
           <input
-            type="text"
-            placeholder="Payer ID"
-            value={settlementDetails.payer_id}
+            type="email"
+            placeholder="Payer Email"
+            value={settlementDetails.payer_email}
             onChange={(e) =>
-              setSettlementDetails({ ...settlementDetails, payer_id: e.target.value })
+              setSettlementDetails({ ...settlementDetails, payer_email: e.target.value })
             }
           />
           <input
-            type="text"
-            placeholder="Payee ID"
-            value={settlementDetails.payee_id}
+            type="email"
+            placeholder="Payee Email"
+            value={settlementDetails.payee_email}
             onChange={(e) =>
-              setSettlementDetails({ ...settlementDetails, payee_id: e.target.value })
+              setSettlementDetails({ ...settlementDetails, payee_email: e.target.value })
             }
           />
           <input
