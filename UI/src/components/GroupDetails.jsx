@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-
-const baseUrl = import.meta.env.VITE_API_URL;
+import GroupService from "./GroupService";
 
 function GroupDetails({ group, onBackClick }) {
   const [members, setMembers] = useState([]);
@@ -10,59 +9,43 @@ function GroupDetails({ group, onBackClick }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Modals and input state
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [email, setEmail] = useState("");
+  const [addError, setAddError] = useState(null);
+  const [isAdding, setIsAdding] = useState(false);
+
+  const [showAddExpense, setShowAddExpense] = useState(false);
+  const [expenseDetails, setExpenseDetails] = useState({
+    paid_by: "",
+    amount: "",
+    description: "",
+  });
+
+  const [showAddSettlement, setShowAddSettlement] = useState(false);
+  const [settlementDetails, setSettlementDetails] = useState({
+    payer_id: "",
+    payee_id: "",
+    amount: "",
+  });
+
   useEffect(() => {
     async function fetchGroupDetails() {
       try {
         setLoading(true);
         setError(null);
         const token = localStorage.getItem("authToken");
-        // Replace these URLs with your API endpoints
-        const membersResponse = await fetch(
-          `${baseUrl}/groups/${group.group_id}/members`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const expensesResponse = await fetch(
-          `${baseUrl}/groups/${group.group_id}/expenses`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const settlementsResponse = await fetch(
-          `${baseUrl}/groups/${group.group_id}/settlements`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
+
+        const members = await GroupService.fetchMembers(group.group_id, token);
+        const expenses = await GroupService.fetchExpenses(group.group_id, token);
+        const settlements = await GroupService.fetchSettlements(
+          group.group_id,
+          token
         );
 
-        if (
-          !membersResponse.ok ||
-          !expensesResponse.ok ||
-          !settlementsResponse.ok
-        ) {
-          throw new Error("Failed to fetch group details");
-        }
-
-        const membersData = await membersResponse.json();
-        const expensesData = await expensesResponse.json();
-        const settlementsData = await settlementsResponse.json();
-
-        setMembers(membersData.members);
-        setExpenses(expensesData.expenses);
-        setSettlements(settlementsData.settlements);
+        setMembers(members);
+        setExpenses(expenses);
+        setSettlements(settlements);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -73,13 +56,64 @@ function GroupDetails({ group, onBackClick }) {
     fetchGroupDetails();
   }, [group.group_id]);
 
-  if (loading) {
-    return <motion.div>Loading...</motion.div>;
-  }
+  const handleAddMember = async () => {
+    try {
+      setIsAdding(true);
+      setAddError(null);
+      const token = localStorage.getItem("authToken");
+      const userId = await GroupService.getUserIdByEmail(email, token);
+      await GroupService.addMember(group.group_id, userId, token);
 
-  if (error) {
-    return <motion.div>Error: {error}</motion.div>;
-  }
+      const updatedMembers = await GroupService.fetchMembers(group.group_id, token);
+      setMembers(updatedMembers);
+      setShowAddMember(false);
+      setEmail("");
+    } catch (err) {
+      setAddError(err.message);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handleAddExpense = async () => {
+    try {
+      setIsAdding(true);
+      const token = localStorage.getItem("authToken");
+      await GroupService.addExpense(group.group_id, expenseDetails, token);
+
+      const updatedExpenses = await GroupService.fetchExpenses(group.group_id, token);
+      setExpenses(updatedExpenses);
+      setShowAddExpense(false);
+      setExpenseDetails({ paid_by: "", amount: "", description: "" });
+    } catch (err) {
+      setAddError(err.message);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handleAddSettlement = async () => {
+    try {
+      setIsAdding(true);
+      const token = localStorage.getItem("authToken");
+      await GroupService.addSettlement(group.group_id, settlementDetails, token);
+
+      const updatedSettlements = await GroupService.fetchSettlements(
+        group.group_id,
+        token
+      );
+      setSettlements(updatedSettlements);
+      setShowAddSettlement(false);
+      setSettlementDetails({ payer_id: "", payee_id: "", amount: "" });
+    } catch (err) {
+      setAddError(err.message);
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  if (loading) return <motion.div>Loading...</motion.div>;
+  if (error) return <motion.div>Error: {error}</motion.div>;
 
   return (
     <motion.div className="group-detail-view">
@@ -92,8 +126,7 @@ function GroupDetails({ group, onBackClick }) {
         <strong>Created By:</strong> {group.created_by || "N/A"}
       </p>
       <p>
-        <strong>Created At:</strong>{" "}
-        {new Date(group.created_at).toLocaleString()}
+        <strong>Created At:</strong> {new Date(group.created_at).toLocaleString()}
       </p>
       <p>
         <strong>Group Id:</strong> {group.group_id || "N/A"}
@@ -117,7 +150,8 @@ function GroupDetails({ group, onBackClick }) {
         {expenses.length > 0 ? (
           expenses.map((expense) => (
             <li key={expense.id}>
-              {expense.amount} paid by {expense.name} | Description : {expense.description}
+              {expense.amount} paid by {expense.name} | Description :{" "}
+              {expense.description}
             </li>
           ))
         ) : (
@@ -130,13 +164,109 @@ function GroupDetails({ group, onBackClick }) {
         {settlements.length > 0 ? (
           settlements.map((settlement) => (
             <li key={settlement.id}>
-              {settlement.name_payer} paid {settlement.name_payee} - {settlement.amount}{" "}
+              {settlement.name_payer} paid {settlement.name_payee} -{" "}
+              {settlement.amount}{" "}
             </li>
           ))
         ) : (
           <p>No settlements found.</p>
         )}
       </ul>
+
+      {/* Buttons to Add Member, Expense, Settlement */}
+      <button onClick={() => setShowAddMember(true)}>Add Member</button>
+      <button onClick={() => setShowAddExpense(true)}>Add Expense</button>
+      <button onClick={() => setShowAddSettlement(true)}>Add Settlement</button>
+
+      {/* Modal for Adding Member */}
+      {showAddMember && (
+        <div className="modal">
+          <h3>Add Member</h3>
+          <input
+            type="email"
+            placeholder="Enter member email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <button onClick={handleAddMember} disabled={isAdding}>
+            {isAdding ? "Adding..." : "Add Member"}
+          </button>
+          <button onClick={() => setShowAddMember(false)}>Cancel</button>
+          {addError && <p className="error">{addError}</p>}
+        </div>
+      )}
+
+      {/* Modal for Adding Expense */}
+      {showAddExpense && (
+        <div className="modal">
+          <h3>Add Expense</h3>
+          <input
+            type="text"
+            placeholder="Paid By (User ID)"
+            value={expenseDetails.paid_by}
+            onChange={(e) =>
+              setExpenseDetails({ ...expenseDetails, paid_by: e.target.value })
+            }
+          />
+          <input
+            type="number"
+            placeholder="Amount"
+            value={expenseDetails.amount}
+            onChange={(e) =>
+              setExpenseDetails({ ...expenseDetails, amount: e.target.value })
+            }
+          />
+          <input
+            type="text"
+            placeholder="Description"
+            value={expenseDetails.description}
+            onChange={(e) =>
+              setExpenseDetails({ ...expenseDetails, description: e.target.value })
+            }
+          />
+          <button onClick={handleAddExpense} disabled={isAdding}>
+            {isAdding ? "Adding..." : "Add Expense"}
+          </button>
+          <button onClick={() => setShowAddExpense(false)}>Cancel</button>
+          {addError && <p className="error">{addError}</p>}
+        </div>
+      )}
+
+      {/* Modal for Adding Settlement */}
+      {showAddSettlement && (
+        <div className="modal">
+          <h3>Add Settlement</h3>
+          <input
+            type="text"
+            placeholder="Payer ID"
+            value={settlementDetails.payer_id}
+            onChange={(e) =>
+              setSettlementDetails({ ...settlementDetails, payer_id: e.target.value })
+            }
+          />
+          <input
+            type="text"
+            placeholder="Payee ID"
+            value={settlementDetails.payee_id}
+            onChange={(e) =>
+              setSettlementDetails({ ...settlementDetails, payee_id: e.target.value })
+            }
+          />
+          <input
+            type="number"
+            placeholder="Amount"
+            value={settlementDetails.amount}
+            onChange={(e) =>
+              setSettlementDetails({ ...settlementDetails, amount: e.target.value })
+            }
+          />
+          <button onClick={handleAddSettlement} disabled={isAdding}>
+            {isAdding ? "Adding..." : "Add Settlement"}
+          </button>
+          <button onClick={() => setShowAddSettlement(false)}>Cancel</button>
+          {addError && <p className="error">{addError}</p>}
+        </div>
+      )}
     </motion.div>
   );
 }
