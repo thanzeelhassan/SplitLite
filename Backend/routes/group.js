@@ -186,4 +186,34 @@ router.get(
   }
 );
 
+// Get all participants of all expenses in a group
+router.get("/groups/:groupId/expenseparticipants", authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    const result = await sql`
+      SELECT e.expense_id, ep.expense_participant_id, e.paid_by, e.amount, ep.amount_owed, ep.user_id, u.name, e.created_at, e.description
+      FROM expenses e
+      INNER JOIN expenseparticipants ep on e.expense_id = ep.expense_id
+      INNER JOIN users u on u.user_id = ep.user_id
+      WHERE e.group_id = ${groupId}
+      ORDER BY e.created_at DESC;
+    `;
+
+    if (result.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No expenses participants found for this group." });
+    }
+
+    res.status(200).json({
+      message: "Expense participants retrieved successfully.",
+      expenses: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred while fetching group expense participants.");
+  }
+});
+
 module.exports = router;

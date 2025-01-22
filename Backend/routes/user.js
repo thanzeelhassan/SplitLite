@@ -68,4 +68,33 @@ router.get('/profile', authenticateToken, (req, res) => {
     });
 });
 
+router.post('/users/email', authenticateToken, async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        const result = await sql`
+        SELECT user_id, name, email, phone_number, created_at 
+        FROM users
+        WHERE email = ${email};
+      `;
+
+        if (result.length === 0) {
+            return res
+                .status(500)
+                .send('Failed to get user details with email.');
+        }
+
+        const user = result[0];
+        res.status(201).json({
+            message: 'User details fetched successfully.',
+            user,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send(
+            'An error occurred while fetching the user details.'
+        );
+    }
+});
+
 module.exports = router;
