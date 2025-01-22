@@ -207,7 +207,6 @@ body {
 }
 
 .custom-button:hover {
-  background-color: #17bebb;
   padding: 8px 24px; /* Increase padding on hover to accommodate text */
   width: 180px;
 }
