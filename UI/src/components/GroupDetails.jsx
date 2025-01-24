@@ -216,27 +216,44 @@ function GroupDetails({ group, onBackClick }) {
       </ul>
 
       <h2>Expenses</h2>
-      <ul>
+      <ul style={{ listStyle: "none", padding: 0 }}>
         {expenses.length > 0 ? (
           expenses.map((expense) => (
-            <li key={expense.expense_id}>
-              <div>
-                {expense.amount} paid by {expense.name} | Description:{" "}
-                {expense.description}
+            <li
+              key={expense.expense_id}
+              style={{
+                marginBottom: "20px", // Add spacing between expenses
+                padding: "15px",
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+              }}
+            >
+              <div style={{ marginBottom: "10px" }}>
+                <strong>{expense.amount}</strong> paid by{" "}
+                <strong>{expense.name}</strong> | Description:{" "}
+                <strong>{expense.description}</strong>
               </div>
               <div>
                 <strong>Participants:</strong>
-                <ul>
+                <ul style={{ paddingLeft: "20px", marginTop: "10px" }}>
                   {participants[expense.expense_id] &&
                   participants[expense.expense_id].length > 0 ? (
                     participants[expense.expense_id].map((participant) => (
-                      <li key={participant.expense_participant_id}>
+                      <li
+                        key={participant.expense_participant_id}
+                        style={{
+                          marginBottom: "5px", // Add spacing between participants
+                        }}
+                      >
                         {participant.participant_name} owes{" "}
-                        {participant.amount_owed} to {participant.paid_by_name}
+                        <strong>{participant.amount_owed}</strong> to{" "}
+                        <strong>{participant.paid_by_name}</strong>
                       </li>
                     ))
                   ) : (
-                    <li>No participants found for this expense.</li>
+                    <li style={{ color: "#777" }}>
+                      No participants found for this expense.
+                    </li>
                   )}
                 </ul>
               </div>
