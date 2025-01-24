@@ -21,6 +21,7 @@ function GroupDetails({ group, onBackClick }) {
     paid_by_email: "",
     amount: "",
     description: "",
+    participants: [],
   });
 
   const [showAddSettlement, setShowAddSettlement] = useState(false);
@@ -109,27 +110,59 @@ function GroupDetails({ group, onBackClick }) {
       setAddError(null);
       const token = localStorage.getItem("authToken");
 
-      // Resolve email to user ID
+      // Resolve email to user ID for the person who paid
       const paidById = await GroupService.getUserIdByEmail(
         expenseDetails.paid_by_email,
         token
       );
 
+      // Resolve email to user IDs for each participant
+      const participantsWithIds = await Promise.all(
+        (expenseDetails.participants || []).map(async (participant) => {
+          const participantId = await GroupService.getUserIdByEmail(
+            participant.email,
+            token
+          );
+          return {
+            user_id: participantId,
+            amount: participant.amount,
+          };
+        })
+      );
+
+      // Prepare the expense payload
       const expensePayload = {
         paid_by: paidById,
         amount: expenseDetails.amount,
         description: expenseDetails.description,
+        participants: participantsWithIds, // Include participants in the payload
       };
 
+      // Add expense using GroupService
       await GroupService.addExpense(group.group_id, expensePayload, token);
 
+      // Fetch updated expenses
       const updatedExpenses = await GroupService.fetchExpenses(
         group.group_id,
         token
       );
       setExpenses(updatedExpenses);
+
+      // Fetch updated expense participants
+      const updatedExpenseParticipants = await GroupService.fetchExpenseParticipants(
+        group.group_id,
+        token
+      );
+      setParticipants(updatedExpenseParticipants);
+
+      // Reset the form and close modal
       setShowAddExpense(false);
-      setExpenseDetails({ paid_by_email: "", amount: "", description: "" });
+      setExpenseDetails({
+        paid_by_email: "",
+        amount: "",
+        description: "",
+        participants: [], // Reset participants
+      });
     } catch (err) {
       setAddError(err.message);
     } finally {
@@ -305,6 +338,7 @@ function GroupDetails({ group, onBackClick }) {
       {showAddExpense && (
         <div className="modal">
           <h3>Add Expense</h3>
+          {/* Expense Details */}
           <input
             type="email"
             placeholder="Paid By (User Email)"
@@ -335,6 +369,77 @@ function GroupDetails({ group, onBackClick }) {
               })
             }
           />
+
+          {/* Participants Subform */}
+          <h4>Participants</h4>
+          <ul>
+            {expenseDetails.participants &&
+              expenseDetails.participants.map((participant, index) => (
+                <li key={index}>
+                  <input
+                    type="email"
+                    placeholder="Participant Email"
+                    value={participant.email}
+                    onChange={(e) => {
+                      const updatedParticipants = [
+                        ...expenseDetails.participants,
+                      ];
+                      updatedParticipants[index].email = e.target.value;
+                      setExpenseDetails({
+                        ...expenseDetails,
+                        participants: updatedParticipants,
+                      });
+                    }}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Amount"
+                    value={participant.amount}
+                    onChange={(e) => {
+                      const updatedParticipants = [
+                        ...expenseDetails.participants,
+                      ];
+                      updatedParticipants[index].amount = e.target.value;
+                      setExpenseDetails({
+                        ...expenseDetails,
+                        participants: updatedParticipants,
+                      });
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      const updatedParticipants =
+                        expenseDetails.participants.filter(
+                          (_, i) => i !== index
+                        );
+                      setExpenseDetails({
+                        ...expenseDetails,
+                        participants: updatedParticipants,
+                      });
+                    }}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+          </ul>
+
+          {/* Button to Add New Participant */}
+          <button
+            onClick={() =>
+              setExpenseDetails({
+                ...expenseDetails,
+                participants: [
+                  ...(expenseDetails.participants || []),
+                  { email: "", amount: "" },
+                ],
+              })
+            }
+          >
+            Add Participant
+          </button>
+
+          {/* Add Expense Button */}
           <button onClick={handleAddExpense} disabled={isAdding}>
             {isAdding ? "Adding..." : "Add Expense"}
           </button>
