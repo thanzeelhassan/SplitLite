@@ -6,6 +6,7 @@ function GroupDetails({ group, onBackClick }) {
   const [members, setMembers] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [settlements, setSettlements] = useState([]);
+  const [participants, setParticipants] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -46,9 +47,30 @@ function GroupDetails({ group, onBackClick }) {
           token
         );
 
+        const expenseParticipants = await GroupService.fetchExpenseParticipants(
+          group.group_id,
+          token
+        );
+
+        console.log("expenseParticipants :", expenseParticipants);
+
+        // Group participants by expense_id
+        const participantsByExpense = expenseParticipants.reduce(
+          (acc, participant) => {
+            if (!acc[participant.expense_id]) {
+              acc[participant.expense_id] = [];
+            }
+            acc[participant.expense_id].push(participant);
+            return acc;
+          },
+          {}
+        );
+        console.log("participantsByExpense :", participantsByExpense);
+
         setMembers(members);
         setExpenses(expenses);
         setSettlements(settlements);
+        setParticipants(participantsByExpense);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -160,6 +182,8 @@ function GroupDetails({ group, onBackClick }) {
   if (loading) return <motion.div>Loading...</motion.div>;
   if (error) return <motion.div>Error: {error}</motion.div>;
 
+  console.log("participants : ", participants);
+  console.log("expenses : ", expenses);
   return (
     <motion.div className="group-detail-view">
       <button onClick={onBackClick}>Back to Groups</button>
@@ -195,9 +219,27 @@ function GroupDetails({ group, onBackClick }) {
       <ul>
         {expenses.length > 0 ? (
           expenses.map((expense) => (
-            <li key={expense.id}>
-              {expense.amount} paid by {expense.name} | Description :{" "}
-              {expense.description}
+            <li key={expense.expense_id}>
+              <div>
+                {expense.amount} paid by {expense.name} | Description:{" "}
+                {expense.description}
+              </div>
+              <div>
+                <strong>Participants:</strong>
+                <ul>
+                  {participants[expense.expense_id] &&
+                  participants[expense.expense_id].length > 0 ? (
+                    participants[expense.expense_id].map((participant) => (
+                      <li key={participant.expense_participant_id}>
+                        {participant.participant_name} owes{" "}
+                        {participant.amount_owed} to {participant.paid_by_name}
+                      </li>
+                    ))
+                  ) : (
+                    <li>No participants found for this expense.</li>
+                  )}
+                </ul>
+              </div>
             </li>
           ))
         ) : (

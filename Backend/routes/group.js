@@ -191,10 +191,11 @@ router.get(
       const { groupId } = req.params;
 
       const result = await sql`
-      SELECT e.expense_id, ep.expense_participant_id, e.paid_by, e.amount, ep.amount_owed, ep.user_id, u.name, e.created_at, e.description
+      SELECT e.expense_id, ep.expense_participant_id, e.paid_by, e.amount, ep.amount_owed, ep.user_id, u.name as participant_name, e.created_at, e.description, u2.name as paid_by_name
       FROM expenses e
       INNER JOIN expenseparticipants ep on e.expense_id = ep.expense_id
       INNER JOIN users u on u.user_id = ep.user_id
+      INNER JOIN users u2 on u2.user_id = e.paid_by
       WHERE e.group_id = ${groupId}
       ORDER BY e.created_at DESC;
     `;
