@@ -37,7 +37,10 @@ function GroupDetails({ group, onBackClick }) {
         const token = localStorage.getItem("authToken");
 
         const members = await GroupService.fetchMembers(group.group_id, token);
-        const expenses = await GroupService.fetchExpenses(group.group_id, token);
+        const expenses = await GroupService.fetchExpenses(
+          group.group_id,
+          token
+        );
         const settlements = await GroupService.fetchSettlements(
           group.group_id,
           token
@@ -64,7 +67,10 @@ function GroupDetails({ group, onBackClick }) {
       const userId = await GroupService.getUserIdByEmail(email, token);
       await GroupService.addMember(group.group_id, userId, token);
 
-      const updatedMembers = await GroupService.fetchMembers(group.group_id, token);
+      const updatedMembers = await GroupService.fetchMembers(
+        group.group_id,
+        token
+      );
       setMembers(updatedMembers);
       setShowAddMember(false);
       setEmail("");
@@ -95,7 +101,10 @@ function GroupDetails({ group, onBackClick }) {
 
       await GroupService.addExpense(group.group_id, expensePayload, token);
 
-      const updatedExpenses = await GroupService.fetchExpenses(group.group_id, token);
+      const updatedExpenses = await GroupService.fetchExpenses(
+        group.group_id,
+        token
+      );
       setExpenses(updatedExpenses);
       setShowAddExpense(false);
       setExpenseDetails({ paid_by_email: "", amount: "", description: "" });
@@ -128,7 +137,11 @@ function GroupDetails({ group, onBackClick }) {
         amount: settlementDetails.amount,
       };
 
-      await GroupService.addSettlement(group.group_id, settlementPayload, token);
+      await GroupService.addSettlement(
+        group.group_id,
+        settlementPayload,
+        token
+      );
 
       const updatedSettlements = await GroupService.fetchSettlements(
         group.group_id,
@@ -158,7 +171,8 @@ function GroupDetails({ group, onBackClick }) {
         <strong>Created By:</strong> {group.created_by || "N/A"}
       </p>
       <p>
-        <strong>Created At:</strong> {new Date(group.created_at).toLocaleString()}
+        <strong>Created At:</strong>{" "}
+        {new Date(group.created_at).toLocaleString()}
       </p>
       <p>
         <strong>Group Id:</strong> {group.group_id || "N/A"}
@@ -237,7 +251,10 @@ function GroupDetails({ group, onBackClick }) {
             placeholder="Paid By (User Email)"
             value={expenseDetails.paid_by_email}
             onChange={(e) =>
-              setExpenseDetails({ ...expenseDetails, paid_by_email: e.target.value })
+              setExpenseDetails({
+                ...expenseDetails,
+                paid_by_email: e.target.value,
+              })
             }
           />
           <input
@@ -253,7 +270,10 @@ function GroupDetails({ group, onBackClick }) {
             placeholder="Description"
             value={expenseDetails.description}
             onChange={(e) =>
-              setExpenseDetails({ ...expenseDetails, description: e.target.value })
+              setExpenseDetails({
+                ...expenseDetails,
+                description: e.target.value,
+              })
             }
           />
           <button onClick={handleAddExpense} disabled={isAdding}>
@@ -273,7 +293,10 @@ function GroupDetails({ group, onBackClick }) {
             placeholder="Payer Email"
             value={settlementDetails.payer_email}
             onChange={(e) =>
-              setSettlementDetails({ ...settlementDetails, payer_email: e.target.value })
+              setSettlementDetails({
+                ...settlementDetails,
+                payer_email: e.target.value,
+              })
             }
           />
           <input
@@ -281,7 +304,10 @@ function GroupDetails({ group, onBackClick }) {
             placeholder="Payee Email"
             value={settlementDetails.payee_email}
             onChange={(e) =>
-              setSettlementDetails({ ...settlementDetails, payee_email: e.target.value })
+              setSettlementDetails({
+                ...settlementDetails,
+                payee_email: e.target.value,
+              })
             }
           />
           <input
@@ -289,7 +315,10 @@ function GroupDetails({ group, onBackClick }) {
             placeholder="Amount"
             value={settlementDetails.amount}
             onChange={(e) =>
-              setSettlementDetails({ ...settlementDetails, amount: e.target.value })
+              setSettlementDetails({
+                ...settlementDetails,
+                amount: e.target.value,
+              })
             }
           />
           <button onClick={handleAddSettlement} disabled={isAdding}>
