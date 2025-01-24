@@ -134,14 +134,12 @@ router.get("/groups/:groupId/expenses", authenticateToken, async (req, res) => {
       ORDER BY e.created_at DESC;
     `;
 
-    if (result.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No expenses found for this group." });
-    }
-
+    // Always return a 200 response, with an empty array if no expenses are found
     res.status(200).json({
-      message: "Expenses retrieved successfully.",
+      message:
+        result.length > 0
+          ? "Expenses retrieved successfully."
+          : "No expenses found for this group.",
       expenses: result,
     });
   } catch (err) {
@@ -167,14 +165,12 @@ router.get(
       ORDER BY s.created_at DESC;
     `;
 
-      if (result.length === 0) {
-        return res
-          .status(404)
-          .json({ message: "No settlements found for this group." });
-      }
-
+      // Always return a 200 response, with an empty array if no settlements are found
       res.status(200).json({
-        message: "Settlements retrieved successfully.",
+        message:
+          result.length > 0
+            ? "Settlements retrieved successfully."
+            : "No settlements found for this group.",
         settlements: result,
       });
     } catch (err) {
@@ -203,15 +199,13 @@ router.get(
       ORDER BY e.created_at DESC;
     `;
 
-      if (result.length === 0) {
-        return res
-          .status(404)
-          .json({ message: "No expenses participants found for this group." });
-      }
-
+      // Always return a 200 response, with an empty array if no expenseparticipants are found
       res.status(200).json({
-        message: "Expense participants retrieved successfully.",
-        expenses: result,
+        message:
+          result.length > 0
+            ? "Expense participants retrieved successfully."
+            : "No expense participants found for this group.",
+        expenseparticipants: result,
       });
     } catch (err) {
       console.error(err);
