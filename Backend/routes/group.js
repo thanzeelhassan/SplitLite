@@ -157,7 +157,9 @@ router.get(
       const { groupId } = req.params;
 
       const result = await sql`
-      SELECT s.settlement_id, s.payer_id, s.payee_id, s.amount, s.created_at, u.user_id as user_id_payer, u.name as name_payer, u2.user_id as user_id_payee, u2.name as name_payee
+      SELECT s.settlement_id, s.payer_id, s.payee_id, s.amount, s.created_at, 
+      u.user_id as user_id_payer, u.name as name_payer, 
+      u2.user_id as user_id_payee, u2.name as name_payee
       FROM settlements s
       INNER JOIN users u ON u.user_id = s.payer_id
       INNER JOIN users u2 ON u2.user_id = s.payee_id
@@ -191,7 +193,8 @@ router.get(
       const { groupId } = req.params;
 
       const result = await sql`
-      SELECT e.expense_id, ep.expense_participant_id, e.paid_by, e.amount, ep.amount_owed, ep.user_id, u.name as participant_name, e.created_at, e.description, u2.name as paid_by_name
+      SELECT e.expense_id, ep.expense_participant_id, e.paid_by, e.amount, ep.amount_owed, ep.user_id, 
+      u.name as participant_name, e.created_at, e.description, u2.name as paid_by_name
       FROM expenses e
       INNER JOIN expenseparticipants ep on e.expense_id = ep.expense_id
       INNER JOIN users u on u.user_id = ep.user_id
