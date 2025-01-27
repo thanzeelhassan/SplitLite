@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import ToastContainerComponent from "./Toasts";
+
+const baseUrl = import.meta.env.VITE_API_URL;
 
 function AddGroup(props) {
   const [groupDetails, setGroupDetails] = useState({
-    groupName: "",
-    groupDesc: "",
+    name: "",
+    description: "",
   });
+  const [buttonDisabled, setButtonDisabled] = useState(false);
   function handleChange(event) {
     const { name, value } = event.target;
     setGroupDetails((prev) => {
@@ -15,7 +20,35 @@ function AddGroup(props) {
       };
     });
   }
-  function handleSubmit() {}
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setButtonDisabled(true);
+    try {
+      const token = localStorage.getItem("authToken");
+      const response = await fetch(`${baseUrl}/groups`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(groupDetails),
+      });
+      console.log(`Response status: ${response.status}`);
+      if (response.ok) {
+        toast.success("Group created successfully!");
+        navigate("/dashboard");
+      } else {
+        const errorData = await response.json();
+        toast.error(
+          errorData.message || "Something went wrong. Please try again."
+        );
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong. Please try again.");
+    }
+    setButtonDisabled(false);
+  }
   return (
     <motion.div
       className="groups-container"
@@ -26,24 +59,27 @@ function AddGroup(props) {
     >
       <button onClick={() => props.onClick()}>Back to Groups</button>
       <h2>Add Group</h2>
-      <form onSubmit={handleSubmit}>
+      <form className="add-group-form" onSubmit={handleSubmit}>
         <input
           type="text"
-          name="groupName"
+          name="name"
           placeholder="Name"
-          value={groupDetails.groupName}
+          value={groupDetails.name}
           required
           onChange={handleChange}
         />
-        <input
+        <textarea
           type="text"
-          name="groupDesc"
+          name="description"
           placeholder="Description"
-          value={groupDetails.groupDesc}
+          value={groupDetails.description}
           onChange={handleChange}
         />
-        <button type="submit">Submit</button>
+        <button type="submit" disabled={buttonDisabled}>
+          Submit
+        </button>
       </form>
+      <ToastContainerComponent />
     </motion.div>
   );
 }

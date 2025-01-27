@@ -39,7 +39,8 @@ body {
   font-size: 2rem;
   margin-top: 0px;
 }
-
+.add-group-form input,
+.add-group-form textarea,
 .login-form input {
   width: 90%;
   height: 25px;
@@ -50,6 +51,12 @@ body {
   border: 0.1px solid rgb(181, 181, 181);
   border-radius: 5px;
 }
+.add-group-form textarea {
+  min-width: 90%;
+  max-width: 90%;
+  min-height: 25px;
+}
+.add-group-form button,
 .login-form button {
   width: 90%;
   background-color: #079a98;
@@ -255,4 +262,15 @@ body {
 
 .action-buttons button:hover {
   background-color: #0056b3;
+}
+.add-group-form {
+  background-color: #ffffff;
+  height: auto;
+  color: black;
+  text-align: center;
+  padding: 10px;
+  padding-top: 30px;
+  border-radius: 5px;
+  width: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }

@@ -11,7 +11,7 @@ import Logo from "./Logo";
 const baseUrl = import.meta.env.VITE_API_URL;
 
 function Dashboard() {
-  const [activeNavItem, setActiveNavItem] = useState("profile");
+  const [activeNavItem, setActiveNavItem] = useState("groups");
   //const [user, setUser] = useState(null);
   const [profileDetails, setProfileDetails] = useState({
     userName: "",
@@ -32,7 +32,7 @@ function Dashboard() {
     // Define an async function to fetch data
     const fetchProfileDetails = async () => {
       try {
-        setLoading(true); // Start loading
+        //setLoading(true); // Start loading
         const token = localStorage.getItem("authToken");
 
         const response = await fetch(`${baseUrl}/profile`, {
@@ -61,7 +61,7 @@ function Dashboard() {
         console.error("Error:", error);
         toast.error("Something went wrong. Please try again.");
       } finally {
-        setLoading(false); // End loading
+        //setLoading(false); // End loading
       }
     };
 
@@ -94,8 +94,6 @@ function Dashboard() {
     fetchProfileDetails();
     fetchGroupsDetails();
   }, []); // Empty dependency array ensures this runs only once after the first render
-
-  if (loading) return <p>Loading...</p>; // Show a loading message
 
   const handleLogout = async () => {
     try {
@@ -137,33 +135,9 @@ function Dashboard() {
   };
 
   if (loading) {
+    //Show a loading message
     return <h1>Loading...</h1>;
   }
-
-  //Same API response
-  // const groupsSample = [
-  //   {
-  //     group_id: 7,
-  //     name: "Kakkanad Boys",
-  //     balance: 250,
-  //     created_by: "Thanzeel",
-  //     created_at: "2025-01-14T00:14:48.210Z",
-  //   },
-  //   {
-  //     group_id: 2,
-  //     name: "Study Group",
-  //     balance: -1000,
-  //     created_by: "Kiran",
-  //     created_at: "2025-01-06T23:45:57.851Z",
-  //   },
-  //   {
-  //     group_id: 4,
-  //     name: "Bday Group",
-  //     balance: 0,
-  //     created_by: "Kiran",
-  //     created_at: "2025-01-06T23:45:57.851Z",
-  //   },
-  // ];
 
   return (
     <motion.div
