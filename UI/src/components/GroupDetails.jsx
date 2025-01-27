@@ -31,6 +31,34 @@ function GroupDetails({ group, onBackClick }) {
     amount: "",
   });
 
+  // Function to manage modals
+  const openModal = (modalName) => {
+    setShowAddMember(false);
+    setShowAddExpense(false);
+    setShowAddSettlement(false);
+
+    switch (modalName) {
+      case "addMember":
+        setShowAddMember(true);
+        break;
+      case "addExpense":
+        setShowAddExpense(true);
+        break;
+      case "addSettlement":
+        setShowAddSettlement(true);
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Function to close all modals
+  const closeAllModals = () => {
+    setShowAddMember(false);
+    setShowAddExpense(false);
+    setShowAddSettlement(false);
+  };
+
   useEffect(() => {
     async function fetchGroupDetails() {
       try {
@@ -149,10 +177,8 @@ function GroupDetails({ group, onBackClick }) {
       setExpenses(updatedExpenses);
 
       // Fetch updated expense participants
-      const updatedExpenseParticipants = await GroupService.fetchExpenseParticipants(
-        group.group_id,
-        token
-      );
+      const updatedExpenseParticipants =
+        await GroupService.fetchExpenseParticipants(group.group_id, token);
       setParticipants(updatedExpenseParticipants);
 
       // Reset the form and close modal
@@ -219,28 +245,52 @@ function GroupDetails({ group, onBackClick }) {
   console.log("expenses : ", expenses);
   return (
     <motion.div className="group-detail-view">
-      <button onClick={onBackClick}>Back to Groups</button>
-      <h2>{group.name}</h2>
-      <p>
-        <strong>Description:</strong> {group.description}
-      </p>
-      <p>
-        <strong>Created By:</strong> {group.created_by || "N/A"}
-      </p>
-      <p>
-        <strong>Created At:</strong>{" "}
-        {new Date(group.created_at).toLocaleString()}
-      </p>
-      <p>
-        <strong>Group Id:</strong> {group.group_id || "N/A"}
-      </p>
+      <div
+        style={{
+          marginBottom: "20px",
+          padding: "15px",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+        }}
+      >
+        <button onClick={onBackClick}>Back to Groups</button>
+        <h2>{group.name}</h2>
+        <p>
+          <strong>Description:</strong> {group.description}
+        </p>
+        <p>
+          <strong>Created By:</strong> {group.created_by || "N/A"}
+        </p>
+        <p>
+          <strong>Created At:</strong>{" "}
+          {new Date(group.created_at).toLocaleString()}
+        </p>
+        <p>
+          <strong>Group Id:</strong> {group.group_id || "N/A"}
+        </p>
+      </div>
 
       <h2>Members</h2>
-      <ul>
+      <ul
+        style={{
+          listStyle: "none",
+          padding: 0,
+        }}
+      >
         {members.length > 0 ? (
           members.map((member) => (
-            <li key={member.id}>
-              {member.name} ({member.email})
+            <li
+              key={member.id}
+              style={{
+                marginBottom: "10px",
+                padding: "15px",
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+              }}
+            >
+              Name : <strong>{member.name} </strong>
+              <br></br>
+              Email : <strong>({member.email})</strong>
             </li>
           ))
         ) : (
@@ -298,10 +348,18 @@ function GroupDetails({ group, onBackClick }) {
       </ul>
 
       <h2>Settlements</h2>
-      <ul>
+      <ul style={{ listStyle: "none", padding: 0 }}>
         {settlements.length > 0 ? (
           settlements.map((settlement) => (
-            <li key={settlement.id}>
+            <li
+              key={settlement.id}
+              style={{
+                marginBottom: "10px",
+                padding: "15px",
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+              }}
+            >
               {settlement.name_payer} paid {settlement.name_payee} -{" "}
               {settlement.amount}{" "}
             </li>
@@ -312,9 +370,9 @@ function GroupDetails({ group, onBackClick }) {
       </ul>
 
       {/* Buttons to Add Member, Expense, Settlement */}
-      <button onClick={() => setShowAddMember(true)}>Add Member</button>
-      <button onClick={() => setShowAddExpense(true)}>Add Expense</button>
-      <button onClick={() => setShowAddSettlement(true)}>Add Settlement</button>
+      <button onClick={() => openModal("addMember")}>Add Member</button>
+      <button onClick={() => openModal("addExpense")}>Add Expense</button>
+      <button onClick={() => openModal("addSettlement")}>Add Settlement</button>
 
       {/* Modal for Adding Member */}
       {showAddMember && (
@@ -329,7 +387,7 @@ function GroupDetails({ group, onBackClick }) {
           <button onClick={handleAddMember} disabled={isAdding}>
             {isAdding ? "Adding..." : "Add Member"}
           </button>
-          <button onClick={() => setShowAddMember(false)}>Cancel</button>
+          <button onClick={closeAllModals}>Cancel</button>
           {addError && <p className="error">{addError}</p>}
         </div>
       )}
@@ -443,7 +501,7 @@ function GroupDetails({ group, onBackClick }) {
           <button onClick={handleAddExpense} disabled={isAdding}>
             {isAdding ? "Adding..." : "Add Expense"}
           </button>
-          <button onClick={() => setShowAddExpense(false)}>Cancel</button>
+          <button onClick={closeAllModals}>Cancel</button>
           {addError && <p className="error">{addError}</p>}
         </div>
       )}
@@ -488,7 +546,7 @@ function GroupDetails({ group, onBackClick }) {
           <button onClick={handleAddSettlement} disabled={isAdding}>
             {isAdding ? "Adding..." : "Add Settlement"}
           </button>
-          <button onClick={() => setShowAddSettlement(false)}>Cancel</button>
+          <button onClick={closeAllModals}>Cancel</button>
           {addError && <p className="error">{addError}</p>}
         </div>
       )}
