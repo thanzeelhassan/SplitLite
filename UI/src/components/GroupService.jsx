@@ -89,6 +89,40 @@ class GroupService {
     });
     if (!response.ok) throw new Error("Failed to add settlement");
   }
+
+  static async fetchExpenseParticipants(groupId, token) {
+    const response = await fetch(
+      `${baseUrl}/groups/${groupId}/expenseparticipants`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (!response.ok) throw new Error("Failed to fetch expense participants");
+    const data = await response.json();
+    return data.expenseparticipants;
+  }
+
+  static async fetchExpensesWithParticipants(groupId, token) {
+    // Fetch expenses and participants in parallel
+    const [expenses, expenseParticipants] = await Promise.all([
+      this.fetchExpenses(groupId, token),
+      this.fetchExpenseParticipants(groupId, token),
+    ]);
+
+    // Map participants to their respective expenses
+    const expensesWithParticipants = expenses.map((expense) => ({
+      ...expense,
+      participants: expenseParticipants.filter(
+        (participant) => participant.expense_id === expense.expense_id
+      ),
+    }));
+
+    return expensesWithParticipants;
+  }
 }
 
 export default GroupService;

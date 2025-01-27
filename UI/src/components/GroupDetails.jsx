@@ -1,11 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import GroupService from "./GroupService";
+import PendingPayments from "./GroupDetails/PendingPayments";
+import SettlementsList from "./GroupDetails/SettlementsList";
+import ExpensesList from "./GroupDetails/ExpensesList";
+import MembersList from "./GroupDetails/MembersList";
+import GroupInfo from "./GroupDetails/GroupInfo";
 
 function GroupDetails({ group, onBackClick }) {
   const [members, setMembers] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [settlements, setSettlements] = useState([]);
+  const [participants, setParticipants] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -20,6 +26,7 @@ function GroupDetails({ group, onBackClick }) {
     paid_by_email: "",
     amount: "",
     description: "",
+    participants: [],
   });
 
   const [showAddSettlement, setShowAddSettlement] = useState(false);
@@ -29,6 +36,34 @@ function GroupDetails({ group, onBackClick }) {
     amount: "",
   });
 
+  // Function to manage modals
+  const openModal = (modalName) => {
+    setShowAddMember(false);
+    setShowAddExpense(false);
+    setShowAddSettlement(false);
+
+    switch (modalName) {
+      case "addMember":
+        setShowAddMember(true);
+        break;
+      case "addExpense":
+        setShowAddExpense(true);
+        break;
+      case "addSettlement":
+        setShowAddSettlement(true);
+        break;
+      default:
+        break;
+    }
+  };
+
+  // Function to close all modals
+  const closeAllModals = () => {
+    setShowAddMember(false);
+    setShowAddExpense(false);
+    setShowAddSettlement(false);
+  };
+
   useEffect(() => {
     async function fetchGroupDetails() {
       try {
@@ -37,15 +72,36 @@ function GroupDetails({ group, onBackClick }) {
         const token = localStorage.getItem("authToken");
 
         const members = await GroupService.fetchMembers(group.group_id, token);
-        const expenses = await GroupService.fetchExpenses(group.group_id, token);
+        const expenses = await GroupService.fetchExpenses(
+          group.group_id,
+          token
+        );
         const settlements = await GroupService.fetchSettlements(
           group.group_id,
           token
         );
 
+        const expenseParticipants = await GroupService.fetchExpenseParticipants(
+          group.group_id,
+          token
+        );
+
+        // Group participants by expense_id
+        const participantsByExpense = expenseParticipants.reduce(
+          (acc, participant) => {
+            if (!acc[participant.expense_id]) {
+              acc[participant.expense_id] = [];
+            }
+            acc[participant.expense_id].push(participant);
+            return acc;
+          },
+          {}
+        );
+
         setMembers(members);
         setExpenses(expenses);
         setSettlements(settlements);
+        setParticipants(participantsByExpense);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -64,7 +120,10 @@ function GroupDetails({ group, onBackClick }) {
       const userId = await GroupService.getUserIdByEmail(email, token);
       await GroupService.addMember(group.group_id, userId, token);
 
-      const updatedMembers = await GroupService.fetchMembers(group.group_id, token);
+      const updatedMembers = await GroupService.fetchMembers(
+        group.group_id,
+        token
+      );
       setMembers(updatedMembers);
       setShowAddMember(false);
       setEmail("");
@@ -81,24 +140,57 @@ function GroupDetails({ group, onBackClick }) {
       setAddError(null);
       const token = localStorage.getItem("authToken");
 
-      // Resolve email to user ID
+      // Resolve email to user ID for the person who paid
       const paidById = await GroupService.getUserIdByEmail(
         expenseDetails.paid_by_email,
         token
       );
 
+      // Resolve email to user IDs for each participant
+      const participantsWithIds = await Promise.all(
+        (expenseDetails.participants || []).map(async (participant) => {
+          const participantId = await GroupService.getUserIdByEmail(
+            participant.email,
+            token
+          );
+          return {
+            user_id: participantId,
+            amount: participant.amount,
+          };
+        })
+      );
+
+      // Prepare the expense payload
       const expensePayload = {
         paid_by: paidById,
         amount: expenseDetails.amount,
         description: expenseDetails.description,
+        participants: participantsWithIds, // Include participants in the payload
       };
 
+      // Add expense using GroupService
       await GroupService.addExpense(group.group_id, expensePayload, token);
 
-      const updatedExpenses = await GroupService.fetchExpenses(group.group_id, token);
+      // Fetch updated expenses
+      const updatedExpenses = await GroupService.fetchExpenses(
+        group.group_id,
+        token
+      );
       setExpenses(updatedExpenses);
+
+      // Fetch updated expense participants
+      const updatedExpenseParticipants =
+        await GroupService.fetchExpenseParticipants(group.group_id, token);
+      setParticipants(updatedExpenseParticipants);
+
+      // Reset the form and close modal
       setShowAddExpense(false);
-      setExpenseDetails({ paid_by_email: "", amount: "", description: "" });
+      setExpenseDetails({
+        paid_by_email: "",
+        amount: "",
+        description: "",
+        participants: [], // Reset participants
+      });
     } catch (err) {
       setAddError(err.message);
     } finally {
@@ -128,7 +220,11 @@ function GroupDetails({ group, onBackClick }) {
         amount: settlementDetails.amount,
       };
 
-      await GroupService.addSettlement(group.group_id, settlementPayload, token);
+      await GroupService.addSettlement(
+        group.group_id,
+        settlementPayload,
+        token
+      );
 
       const updatedSettlements = await GroupService.fetchSettlements(
         group.group_id,
@@ -149,66 +245,22 @@ function GroupDetails({ group, onBackClick }) {
 
   return (
     <motion.div className="group-detail-view">
-      <button onClick={onBackClick}>Back to Groups</button>
-      <h2>{group.name}</h2>
-      <p>
-        <strong>Description:</strong> {group.description}
-      </p>
-      <p>
-        <strong>Created By:</strong> {group.created_by || "N/A"}
-      </p>
-      <p>
-        <strong>Created At:</strong> {new Date(group.created_at).toLocaleString()}
-      </p>
-      <p>
-        <strong>Group Id:</strong> {group.group_id || "N/A"}
-      </p>
+      {/* Group Info section*/}
+      <GroupInfo group={group} onBackClick={onBackClick} />
 
-      <h2>Members</h2>
-      <ul>
-        {members.length > 0 ? (
-          members.map((member) => (
-            <li key={member.id}>
-              {member.name} ({member.email})
-            </li>
-          ))
-        ) : (
-          <p>No members found.</p>
-        )}
-      </ul>
+      {/* Members section */}
+      <MembersList members={members} />
 
-      <h2>Expenses</h2>
-      <ul>
-        {expenses.length > 0 ? (
-          expenses.map((expense) => (
-            <li key={expense.id}>
-              {expense.amount} paid by {expense.name} | Description :{" "}
-              {expense.description}
-            </li>
-          ))
-        ) : (
-          <p>No expenses found.</p>
-        )}
-      </ul>
+      {/* Expenses section */}
+      <ExpensesList expenses={expenses} participants={participants} />
 
-      <h2>Settlements</h2>
-      <ul>
-        {settlements.length > 0 ? (
-          settlements.map((settlement) => (
-            <li key={settlement.id}>
-              {settlement.name_payer} paid {settlement.name_payee} -{" "}
-              {settlement.amount}{" "}
-            </li>
-          ))
-        ) : (
-          <p>No settlements found.</p>
-        )}
-      </ul>
+      {/* Settlements section */}
+      <SettlementsList settlements={settlements} />
 
       {/* Buttons to Add Member, Expense, Settlement */}
-      <button onClick={() => setShowAddMember(true)}>Add Member</button>
-      <button onClick={() => setShowAddExpense(true)}>Add Expense</button>
-      <button onClick={() => setShowAddSettlement(true)}>Add Settlement</button>
+      <button onClick={() => openModal("addMember")}>Add Member</button>
+      <button onClick={() => openModal("addExpense")}>Add Expense</button>
+      <button onClick={() => openModal("addSettlement")}>Add Settlement</button>
 
       {/* Modal for Adding Member */}
       {showAddMember && (
@@ -223,7 +275,7 @@ function GroupDetails({ group, onBackClick }) {
           <button onClick={handleAddMember} disabled={isAdding}>
             {isAdding ? "Adding..." : "Add Member"}
           </button>
-          <button onClick={() => setShowAddMember(false)}>Cancel</button>
+          <button onClick={closeAllModals}>Cancel</button>
           {addError && <p className="error">{addError}</p>}
         </div>
       )}
@@ -232,12 +284,16 @@ function GroupDetails({ group, onBackClick }) {
       {showAddExpense && (
         <div className="modal">
           <h3>Add Expense</h3>
+          {/* Expense Details */}
           <input
             type="email"
             placeholder="Paid By (User Email)"
             value={expenseDetails.paid_by_email}
             onChange={(e) =>
-              setExpenseDetails({ ...expenseDetails, paid_by_email: e.target.value })
+              setExpenseDetails({
+                ...expenseDetails,
+                paid_by_email: e.target.value,
+              })
             }
           />
           <input
@@ -253,13 +309,87 @@ function GroupDetails({ group, onBackClick }) {
             placeholder="Description"
             value={expenseDetails.description}
             onChange={(e) =>
-              setExpenseDetails({ ...expenseDetails, description: e.target.value })
+              setExpenseDetails({
+                ...expenseDetails,
+                description: e.target.value,
+              })
             }
           />
+
+          {/* Participants Subform */}
+          <h4>Participants</h4>
+          <ul>
+            {expenseDetails.participants &&
+              expenseDetails.participants.map((participant, index) => (
+                <li key={index}>
+                  <input
+                    type="email"
+                    placeholder="Participant Email"
+                    value={participant.email}
+                    onChange={(e) => {
+                      const updatedParticipants = [
+                        ...expenseDetails.participants,
+                      ];
+                      updatedParticipants[index].email = e.target.value;
+                      setExpenseDetails({
+                        ...expenseDetails,
+                        participants: updatedParticipants,
+                      });
+                    }}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Amount"
+                    value={participant.amount}
+                    onChange={(e) => {
+                      const updatedParticipants = [
+                        ...expenseDetails.participants,
+                      ];
+                      updatedParticipants[index].amount = e.target.value;
+                      setExpenseDetails({
+                        ...expenseDetails,
+                        participants: updatedParticipants,
+                      });
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      const updatedParticipants =
+                        expenseDetails.participants.filter(
+                          (_, i) => i !== index
+                        );
+                      setExpenseDetails({
+                        ...expenseDetails,
+                        participants: updatedParticipants,
+                      });
+                    }}
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+          </ul>
+
+          {/* Button to Add New Participant */}
+          <button
+            onClick={() =>
+              setExpenseDetails({
+                ...expenseDetails,
+                participants: [
+                  ...(expenseDetails.participants || []),
+                  { email: "", amount: "" },
+                ],
+              })
+            }
+          >
+            Add Participant
+          </button>
+
+          {/* Add Expense Button */}
           <button onClick={handleAddExpense} disabled={isAdding}>
             {isAdding ? "Adding..." : "Add Expense"}
           </button>
-          <button onClick={() => setShowAddExpense(false)}>Cancel</button>
+          <button onClick={closeAllModals}>Cancel</button>
           {addError && <p className="error">{addError}</p>}
         </div>
       )}
@@ -273,7 +403,10 @@ function GroupDetails({ group, onBackClick }) {
             placeholder="Payer Email"
             value={settlementDetails.payer_email}
             onChange={(e) =>
-              setSettlementDetails({ ...settlementDetails, payer_email: e.target.value })
+              setSettlementDetails({
+                ...settlementDetails,
+                payer_email: e.target.value,
+              })
             }
           />
           <input
@@ -281,7 +414,10 @@ function GroupDetails({ group, onBackClick }) {
             placeholder="Payee Email"
             value={settlementDetails.payee_email}
             onChange={(e) =>
-              setSettlementDetails({ ...settlementDetails, payee_email: e.target.value })
+              setSettlementDetails({
+                ...settlementDetails,
+                payee_email: e.target.value,
+              })
             }
           />
           <input
@@ -289,16 +425,21 @@ function GroupDetails({ group, onBackClick }) {
             placeholder="Amount"
             value={settlementDetails.amount}
             onChange={(e) =>
-              setSettlementDetails({ ...settlementDetails, amount: e.target.value })
+              setSettlementDetails({
+                ...settlementDetails,
+                amount: e.target.value,
+              })
             }
           />
           <button onClick={handleAddSettlement} disabled={isAdding}>
             {isAdding ? "Adding..." : "Add Settlement"}
           </button>
-          <button onClick={() => setShowAddSettlement(false)}>Cancel</button>
+          <button onClick={closeAllModals}>Cancel</button>
           {addError && <p className="error">{addError}</p>}
         </div>
       )}
+
+      <PendingPayments settlements={settlements} />
     </motion.div>
   );
 }

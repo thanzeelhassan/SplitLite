@@ -134,14 +134,12 @@ router.get("/groups/:groupId/expenses", authenticateToken, async (req, res) => {
       ORDER BY e.created_at DESC;
     `;
 
-    if (result.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No expenses found for this group." });
-    }
-
+    // Always return a 200 response, with an empty array if no expenses are found
     res.status(200).json({
-      message: "Expenses retrieved successfully.",
+      message:
+        result.length > 0
+          ? "Expenses retrieved successfully."
+          : "No expenses found for this group.",
       expenses: result,
     });
   } catch (err) {
@@ -159,7 +157,9 @@ router.get(
       const { groupId } = req.params;
 
       const result = await sql`
-      SELECT s.settlement_id, s.payer_id, s.payee_id, s.amount, s.created_at, u.user_id as user_id_payer, u.name as name_payer, u2.user_id as user_id_payee, u2.name as name_payee
+      SELECT s.settlement_id, s.payer_id, s.payee_id, s.amount, s.created_at, 
+      u.user_id as user_id_payer, u.name as name_payer, 
+      u2.user_id as user_id_payee, u2.name as name_payee
       FROM settlements s
       INNER JOIN users u ON u.user_id = s.payer_id
       INNER JOIN users u2 ON u2.user_id = s.payee_id
@@ -167,14 +167,12 @@ router.get(
       ORDER BY s.created_at DESC;
     `;
 
-      if (result.length === 0) {
-        return res
-          .status(404)
-          .json({ message: "No settlements found for this group." });
-      }
-
+      // Always return a 200 response, with an empty array if no settlements are found
       res.status(200).json({
-        message: "Settlements retrieved successfully.",
+        message:
+          result.length > 0
+            ? "Settlements retrieved successfully."
+            : "No settlements found for this group.",
         settlements: result,
       });
     } catch (err) {
@@ -187,33 +185,39 @@ router.get(
 );
 
 // Get all participants of all expenses in a group
-router.get("/groups/:groupId/expenseparticipants", authenticateToken, async (req, res) => {
-  try {
-    const { groupId } = req.params;
+router.get(
+  "/groups/:groupId/expenseparticipants",
+  authenticateToken,
+  async (req, res) => {
+    try {
+      const { groupId } = req.params;
 
-    const result = await sql`
-      SELECT e.expense_id, ep.expense_participant_id, e.paid_by, e.amount, ep.amount_owed, ep.user_id, u.name, e.created_at, e.description
+      const result = await sql`
+      SELECT e.expense_id, ep.expense_participant_id, e.paid_by, e.amount, ep.amount_owed, ep.user_id, 
+      u.name as participant_name, e.created_at, e.description, u2.name as paid_by_name
       FROM expenses e
       INNER JOIN expenseparticipants ep on e.expense_id = ep.expense_id
       INNER JOIN users u on u.user_id = ep.user_id
+      INNER JOIN users u2 on u2.user_id = e.paid_by
       WHERE e.group_id = ${groupId}
       ORDER BY e.created_at DESC;
     `;
 
-    if (result.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No expenses participants found for this group." });
+      // Always return a 200 response, with an empty array if no expenseparticipants are found
+      res.status(200).json({
+        message:
+          result.length > 0
+            ? "Expense participants retrieved successfully."
+            : "No expense participants found for this group.",
+        expenseparticipants: result,
+      });
+    } catch (err) {
+      console.error(err);
+      res
+        .status(500)
+        .send("An error occurred while fetching group expense participants.");
     }
-
-    res.status(200).json({
-      message: "Expense participants retrieved successfully.",
-      expenses: result,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("An error occurred while fetching group expense participants.");
   }
-});
+);
 
 module.exports = router;
