@@ -287,9 +287,9 @@ function GroupDetails({ group, onBackClick }) {
                 borderRadius: "8px",
               }}
             >
-              Name : <strong>{member.name} </strong>
-              <br></br>
-              Email : <strong>({member.email})</strong>
+              Name : {member.name}
+              <br />
+              Email : ({member.email})
             </li>
           ))
         ) : (
@@ -311,9 +311,8 @@ function GroupDetails({ group, onBackClick }) {
               }}
             >
               <div style={{ marginBottom: "10px" }}>
-                <strong>{expense.amount}</strong> paid by{" "}
-                <strong>{expense.name}</strong> | Description:{" "}
-                <strong>{expense.description}</strong>
+                {expense.amount} paid by {expense.name} | Description:{" "}
+                {expense.description}
               </div>
               <div>
                 <strong>Participants:</strong>
@@ -328,8 +327,7 @@ function GroupDetails({ group, onBackClick }) {
                         }}
                       >
                         {participant.participant_name} owes{" "}
-                        <strong>{participant.amount_owed}</strong> to{" "}
-                        <strong>{participant.paid_by_name}</strong>
+                        {participant.amount_owed} to {participant.paid_by_name}
                       </li>
                     ))
                   ) : (
