@@ -241,12 +241,11 @@ function GroupDetails({ group, onBackClick }) {
   if (loading) return <motion.div>Loading...</motion.div>;
   if (error) return <motion.div>Error: {error}</motion.div>;
 
-  console.log("participants : ", participants);
-  console.log("expenses : ", expenses);
   return (
     <motion.div className="group-detail-view">
       <div
         style={{
+          marginTop: "30px",
           marginBottom: "20px",
           padding: "15px",
           border: "1px solid #ccc",
