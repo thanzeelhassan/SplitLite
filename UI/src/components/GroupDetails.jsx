@@ -5,6 +5,7 @@ import PendingPayments from "./GroupDetails/PendingPayments";
 import SettlementsList from "./GroupDetails/SettlementsList";
 import ExpensesList from "./GroupDetails/ExpensesList";
 import MembersList from "./GroupDetails/MembersList";
+import GroupInfo from "./GroupDetails/GroupInfo";
 
 function GroupDetails({ group, onBackClick }) {
   const [members, setMembers] = useState([]);
@@ -244,31 +245,8 @@ function GroupDetails({ group, onBackClick }) {
 
   return (
     <motion.div className="group-detail-view">
-      <div
-        style={{
-          marginTop: "30px",
-          marginBottom: "20px",
-          padding: "15px",
-          border: "1px solid #ccc",
-          borderRadius: "8px",
-        }}
-      >
-        <button onClick={onBackClick}>Back to Groups</button>
-        <h2>{group.name}</h2>
-        <p>
-          <strong>Description:</strong> {group.description}
-        </p>
-        <p>
-          <strong>Created By:</strong> {group.created_by || "N/A"}
-        </p>
-        <p>
-          <strong>Created At:</strong>{" "}
-          {new Date(group.created_at).toLocaleString()}
-        </p>
-        <p>
-          <strong>Group Id:</strong> {group.group_id || "N/A"}
-        </p>
-      </div>
+      {/* Group Info section*/}
+      <GroupInfo group={group} onBackClick={onBackClick} />
 
       {/* Members section */}
       <MembersList members={members} />
