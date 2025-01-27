@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import GroupService from "./GroupService";
+import PendingPayments from "./GroupDetails/PendingPayments";
 
 function GroupDetails({ group, onBackClick }) {
   const [members, setMembers] = useState([]);
@@ -81,8 +82,6 @@ function GroupDetails({ group, onBackClick }) {
           token
         );
 
-        console.log("expenseParticipants :", expenseParticipants);
-
         // Group participants by expense_id
         const participantsByExpense = expenseParticipants.reduce(
           (acc, participant) => {
@@ -94,7 +93,6 @@ function GroupDetails({ group, onBackClick }) {
           },
           {}
         );
-        console.log("participantsByExpense :", participantsByExpense);
 
         setMembers(members);
         setExpenses(expenses);
@@ -269,6 +267,7 @@ function GroupDetails({ group, onBackClick }) {
         </p>
       </div>
 
+      {/* Members section */}
       <h2>Members</h2>
       <ul
         style={{
@@ -297,6 +296,7 @@ function GroupDetails({ group, onBackClick }) {
         )}
       </ul>
 
+      {/* Expenses section */}
       <h2>Expenses</h2>
       <ul style={{ listStyle: "none", padding: 0 }}>
         {expenses.length > 0 ? (
@@ -344,6 +344,7 @@ function GroupDetails({ group, onBackClick }) {
         )}
       </ul>
 
+      {/* Settlements section */}
       <h2>Settlements</h2>
       <ul style={{ listStyle: "none", padding: 0 }}>
         {settlements.length > 0 ? (
@@ -547,6 +548,8 @@ function GroupDetails({ group, onBackClick }) {
           {addError && <p className="error">{addError}</p>}
         </div>
       )}
+
+      <PendingPayments settlements={settlements} />
     </motion.div>
   );
 }
