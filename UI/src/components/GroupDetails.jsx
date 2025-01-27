@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import GroupService from "./GroupService";
 import PendingPayments from "./GroupDetails/PendingPayments";
+import SettlementsList from "./GroupDetails/SettlementsList";
 
 function GroupDetails({ group, onBackClick }) {
   const [members, setMembers] = useState([]);
@@ -345,27 +346,7 @@ function GroupDetails({ group, onBackClick }) {
       </ul>
 
       {/* Settlements section */}
-      <h2>Settlements</h2>
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {settlements.length > 0 ? (
-          settlements.map((settlement) => (
-            <li
-              key={settlement.id}
-              style={{
-                marginBottom: "10px",
-                padding: "15px",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-              }}
-            >
-              {settlement.name_payer} paid {settlement.name_payee} -{" "}
-              {settlement.amount}{" "}
-            </li>
-          ))
-        ) : (
-          <p>No settlements found.</p>
-        )}
-      </ul>
+      <SettlementsList settlements={settlements} />
 
       {/* Buttons to Add Member, Expense, Settlement */}
       <button onClick={() => openModal("addMember")}>Add Member</button>
