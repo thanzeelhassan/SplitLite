@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import ToastContainerComponent from "./Toasts";
+import { useNavigate } from "react-router-dom";
 
 const baseUrl = import.meta.env.VITE_API_URL;
 
@@ -11,6 +12,7 @@ function AddGroup(props) {
     description: "",
   });
   const [buttonDisabled, setButtonDisabled] = useState(false);
+  const navigate = useNavigate();
   function handleChange(event) {
     const { name, value } = event.target;
     setGroupDetails((prev) => {

@@ -7,7 +7,6 @@ const router = express.Router();
 // Create a new group
 router.post("/groups", authenticateToken, async (req, res) => {
   try {
-    console.log(req.user);
     const { name, description } = req.body;
 
     // Validate input
@@ -18,17 +17,29 @@ router.post("/groups", authenticateToken, async (req, res) => {
     // Default empty description if not provided
     const groupDescription = description ? description.trim() : null;
 
-    const result = await sql`
+    const groupResult = await sql`
       INSERT INTO groups (name, description, created_by, created_at)
       VALUES (${name}, ${groupDescription}, ${req.user.user_id}, NOW())
       RETURNING group_id, name, description, created_by, created_at;
     `;
 
-    if (result.length === 0) {
+    if (groupResult.length === 0) {
       return res.status(500).send("Failed to create group.");
     }
 
-    const group = result[0];
+    const group = groupResult[0];
+
+    // Insert into groupmembers table
+    const result = await sql`
+      INSERT INTO groupmembers (group_id, user_id)
+      VALUES (${group.group_id}, ${req.user.user_id})
+      RETURNING group_member_id, group_id, user_id, joined_at;
+    `;
+
+    if (groupResult.length === 0) {
+      return res.status(500).send("Failed to create group.");
+    }
+
     res.status(201).json({
       message: "Group created successfully.",
       group,
