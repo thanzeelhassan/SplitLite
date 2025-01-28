@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import GroupService from "./GroupService";
+import { AddExpenseModal } from "./GroupDetails/Modals/AddExpenseModal";
+import { AddMemberModal } from "./GroupDetails/Modals/AddMemberModal";
+import { AddSettlementModal } from "./GroupDetails/Modals/AddSettlementModal";
+import { ActionButtons } from "./GroupDetails/ActionButtons";
 import PendingPayments from "./GroupDetails/PendingPayments";
 import SettlementsList from "./GroupDetails/SettlementsList";
 import ExpensesList from "./GroupDetails/ExpensesList";
@@ -245,201 +249,46 @@ function GroupDetails({ group, onBackClick }) {
 
   return (
     <motion.div className="group-detail-view">
-      {/* Group Info section*/}
       <GroupInfo group={group} onBackClick={onBackClick} />
-
-      {/* Members section */}
       <MembersList members={members} />
-
-      {/* Expenses section */}
       <ExpensesList expenses={expenses} participants={participants} />
-
-      {/* Settlements section */}
       <SettlementsList settlements={settlements} />
-
-      {/* Buttons to Add Member, Expense, Settlement */}
-      <button onClick={() => openModal("addMember")}>Add Member</button>
-      <button onClick={() => openModal("addExpense")}>Add Expense</button>
-      <button onClick={() => openModal("addSettlement")}>Add Settlement</button>
-
-      {/* Modal for Adding Member */}
-      {showAddMember && (
-        <div className="modal">
-          <h3>Add Member</h3>
-          <input
-            type="email"
-            placeholder="Enter member email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <button onClick={handleAddMember} disabled={isAdding}>
-            {isAdding ? "Adding..." : "Add Member"}
-          </button>
-          <button onClick={closeAllModals}>Cancel</button>
-          {addError && <p className="error">{addError}</p>}
-        </div>
-      )}
-
-      {/* Modal for Adding Expense */}
-      {showAddExpense && (
-        <div className="modal">
-          <h3>Add Expense</h3>
-          {/* Expense Details */}
-          <input
-            type="email"
-            placeholder="Paid By (User Email)"
-            value={expenseDetails.paid_by_email}
-            onChange={(e) =>
-              setExpenseDetails({
-                ...expenseDetails,
-                paid_by_email: e.target.value,
-              })
-            }
-          />
-          <input
-            type="number"
-            placeholder="Amount"
-            value={expenseDetails.amount}
-            onChange={(e) =>
-              setExpenseDetails({ ...expenseDetails, amount: e.target.value })
-            }
-          />
-          <input
-            type="text"
-            placeholder="Description"
-            value={expenseDetails.description}
-            onChange={(e) =>
-              setExpenseDetails({
-                ...expenseDetails,
-                description: e.target.value,
-              })
-            }
-          />
-
-          {/* Participants Subform */}
-          <h4>Participants</h4>
-          <ul>
-            {expenseDetails.participants &&
-              expenseDetails.participants.map((participant, index) => (
-                <li key={index}>
-                  <input
-                    type="email"
-                    placeholder="Participant Email"
-                    value={participant.email}
-                    onChange={(e) => {
-                      const updatedParticipants = [
-                        ...expenseDetails.participants,
-                      ];
-                      updatedParticipants[index].email = e.target.value;
-                      setExpenseDetails({
-                        ...expenseDetails,
-                        participants: updatedParticipants,
-                      });
-                    }}
-                  />
-                  <input
-                    type="number"
-                    placeholder="Amount"
-                    value={participant.amount}
-                    onChange={(e) => {
-                      const updatedParticipants = [
-                        ...expenseDetails.participants,
-                      ];
-                      updatedParticipants[index].amount = e.target.value;
-                      setExpenseDetails({
-                        ...expenseDetails,
-                        participants: updatedParticipants,
-                      });
-                    }}
-                  />
-                  <button
-                    onClick={() => {
-                      const updatedParticipants =
-                        expenseDetails.participants.filter(
-                          (_, i) => i !== index
-                        );
-                      setExpenseDetails({
-                        ...expenseDetails,
-                        participants: updatedParticipants,
-                      });
-                    }}
-                  >
-                    Remove
-                  </button>
-                </li>
-              ))}
-          </ul>
-
-          {/* Button to Add New Participant */}
-          <button
-            onClick={() =>
-              setExpenseDetails({
-                ...expenseDetails,
-                participants: [
-                  ...(expenseDetails.participants || []),
-                  { email: "", amount: "" },
-                ],
-              })
-            }
-          >
-            Add Participant
-          </button>
-
-          {/* Add Expense Button */}
-          <button onClick={handleAddExpense} disabled={isAdding}>
-            {isAdding ? "Adding..." : "Add Expense"}
-          </button>
-          <button onClick={closeAllModals}>Cancel</button>
-          {addError && <p className="error">{addError}</p>}
-        </div>
-      )}
-
-      {/* Modal for Adding Settlement */}
-      {showAddSettlement && (
-        <div className="modal">
-          <h3>Add Settlement</h3>
-          <input
-            type="email"
-            placeholder="Payer Email"
-            value={settlementDetails.payer_email}
-            onChange={(e) =>
-              setSettlementDetails({
-                ...settlementDetails,
-                payer_email: e.target.value,
-              })
-            }
-          />
-          <input
-            type="email"
-            placeholder="Payee Email"
-            value={settlementDetails.payee_email}
-            onChange={(e) =>
-              setSettlementDetails({
-                ...settlementDetails,
-                payee_email: e.target.value,
-              })
-            }
-          />
-          <input
-            type="number"
-            placeholder="Amount"
-            value={settlementDetails.amount}
-            onChange={(e) =>
-              setSettlementDetails({
-                ...settlementDetails,
-                amount: e.target.value,
-              })
-            }
-          />
-          <button onClick={handleAddSettlement} disabled={isAdding}>
-            {isAdding ? "Adding..." : "Add Settlement"}
-          </button>
-          <button onClick={closeAllModals}>Cancel</button>
-          {addError && <p className="error">{addError}</p>}
-        </div>
-      )}
-
       <PendingPayments settlements={settlements} />
+
+      <ActionButtons openModal={openModal} />
+
+      {showAddMember && (
+        <AddMemberModal
+          email={email}
+          setEmail={setEmail}
+          isAdding={isAdding}
+          addError={addError}
+          handleAddMember={handleAddMember}
+          closeModal={closeAllModals}
+        />
+      )}
+
+      {showAddExpense && (
+        <AddExpenseModal
+          expenseDetails={expenseDetails}
+          setExpenseDetails={setExpenseDetails}
+          isAdding={isAdding}
+          addError={addError}
+          handleAddExpense={handleAddExpense}
+          closeModal={closeAllModals}
+        />
+      )}
+
+      {showAddSettlement && (
+        <AddSettlementModal
+          settlementDetails={settlementDetails}
+          setSettlementDetails={setSettlementDetails}
+          isAdding={isAdding}
+          addError={addError}
+          handleAddSettlement={handleAddSettlement}
+          closeModal={closeAllModals}
+        />
+      )}
     </motion.div>
   );
 }
