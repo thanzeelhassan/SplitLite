@@ -1,6 +1,6 @@
 // GroupDetails/ActionButtons.jsx
-import React from 'react';
-import { motion } from 'framer-motion';
+import React from "react";
+import { motion } from "framer-motion";
 
 export const ActionButtons = ({ openModal }) => (
   <motion.div className="action-buttons">
