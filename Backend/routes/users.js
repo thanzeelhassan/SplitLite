@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const sql = require("../config/database");
-const authenticateToken = require("../middleware/authenticate");
+const authenticateToken = require("../middleware/authenticatetoken");
 
 const router = express.Router();
 
@@ -15,7 +15,36 @@ router.get("/users", async (req, res) => {
   res.end(count);
 });
 
-// Delete user
+// Register a user
+router.post("/register", async (req, res) => {
+  try {
+    const { username, email, phone, password, confirmPassword } = req.body;
+    if (password !== confirmPassword) {
+      return res.status(400).send("Password and confirm password do not match");
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    let result;
+    if (phone) {
+      result =
+        await sql`INSERT INTO users (name, email, phone_number, password) VALUES (${username}, ${email}, ${phone}, ${hashedPassword});`;
+    } else {
+      result =
+        await sql`INSERT INTO users (name, email, password) VALUES (${username}, ${email}, ${hashedPassword});`;
+    }
+    if (result.length === 0) {
+      res.status(200).json({
+        message: `Registered user ${username} with email ${email}`,
+      });
+    } else {
+      res.status(400).send("Failed to register");
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(400).send("Error occurred while registering.");
+  }
+});
+
+// Delete a user
 router.delete("/delete", async (req, res) => {
   console.log("Deleting user");
   try {
@@ -61,13 +90,7 @@ router.delete("/delete", async (req, res) => {
   }
 });
 
-//profile
-router.get("/profile", authenticateToken, (req, res) => {
-  res.status(200).json({
-    user: req.user,
-  });
-});
-
+// get user details with email
 router.post("/users/email", authenticateToken, async (req, res) => {
   try {
     const { email } = req.body;
@@ -91,6 +114,13 @@ router.post("/users/email", authenticateToken, async (req, res) => {
     console.error(err);
     res.status(500).send("An error occurred while fetching the user details.");
   }
+});
+
+// get user profile
+router.get("/profile", authenticateToken, (req, res) => {
+  res.status(200).json({
+    user: req.user,
+  });
 });
 
 module.exports = router;

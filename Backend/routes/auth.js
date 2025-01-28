@@ -2,41 +2,12 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const sql = require("../config/database");
-const authenticateToken = require("../middleware/authenticate");
+const authenticateToken = require("../middleware/authenticatetoken");
 
 const router = express.Router();
 
 const JWT_SECRET = "HdZXv90sPpwccnGbVGotaIVdAlk9SW39";
 const JWT_EXPIRATION = "1h";
-
-// Register
-router.post("/register", async (req, res) => {
-  try {
-    const { username, email, phone, password, confirmPassword } = req.body;
-    if (password !== confirmPassword) {
-      return res.status(400).send("Password and confirm password do not match");
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    let result;
-    if (phone) {
-      result =
-        await sql`INSERT INTO users (name, email, phone_number, password) VALUES (${username}, ${email}, ${phone}, ${hashedPassword});`;
-    } else {
-      result =
-        await sql`INSERT INTO users (name, email, password) VALUES (${username}, ${email}, ${hashedPassword});`;
-    }
-    if (result.length === 0) {
-      res.status(200).json({
-        message: `Registered user ${username} with email ${email}`,
-      });
-    } else {
-      res.status(400).send("Failed to register");
-    }
-  } catch (err) {
-    console.error(err);
-    res.status(400).send("Error occurred while registering.");
-  }
-});
 
 // Login
 router.post("/login", async (req, res) => {

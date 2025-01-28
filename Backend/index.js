@@ -17,15 +17,23 @@ app.use(
 
 // Routes
 const authRoutes = require("./routes/auth");
-const userRoutes = require("./routes/user");
-const groupRoutes = require("./routes/group");
-const expenseRoutes = require("./routes/expense");
+const userRoutes = require("./routes/users");
+const groupRoutes = require("./routes/groups");
+const groupmembersRoutes = require("./routes/groupmembers");
+const expenseRoutes = require("./routes/expenses");
+const settlementRoutes = require("./routes/settlements");
+const expenseparticipantsRoutes = require("./routes/expenseparticipants");
+const outstandingRoutes = require("./routes/outstanding");
 
 // Use routes
 app.use("/", authRoutes);
 app.use("/", userRoutes);
 app.use("/", groupRoutes);
+app.use("/", groupmembersRoutes);
 app.use("/", expenseRoutes);
+app.use("/", settlementRoutes);
+app.use("/", expenseparticipantsRoutes);
+app.use("/", outstandingRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to SplitLite");
