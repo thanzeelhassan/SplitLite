@@ -16,6 +16,7 @@ function GroupDetails({ group, onBackClick }) {
   const [members, setMembers] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [settlements, setSettlements] = useState([]);
+  const [pendingPayments, setPendingPayments] = useState([]);
   const [participants, setParticipants] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,13 +28,19 @@ function GroupDetails({ group, onBackClick }) {
       setError(null);
       const token = localStorage.getItem("authToken");
 
-      const [members, expenses, settlements, expenseParticipants] =
-        await Promise.all([
-          GroupService.fetchMembers(group.group_id, token),
-          GroupService.fetchExpenses(group.group_id, token),
-          GroupService.fetchSettlements(group.group_id, token),
-          GroupService.fetchExpenseParticipants(group.group_id, token),
-        ]);
+      const [
+        members,
+        expenses,
+        settlements,
+        expenseParticipants,
+        pendingPayments,
+      ] = await Promise.all([
+        GroupService.fetchMembers(group.group_id, token),
+        GroupService.fetchExpenses(group.group_id, token),
+        GroupService.fetchSettlements(group.group_id, token),
+        GroupService.fetchExpenseParticipants(group.group_id, token),
+        GroupService.fetchPendingPayments(group.group_id, token),
+      ]);
 
       const participantsByExpense = expenseParticipants.reduce(
         (acc, participant) => {
@@ -48,6 +55,7 @@ function GroupDetails({ group, onBackClick }) {
       setExpenses(expenses);
       setSettlements(settlements);
       setParticipants(participantsByExpense);
+      setPendingPayments(pendingPayments);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -71,7 +79,7 @@ function GroupDetails({ group, onBackClick }) {
       <MembersList members={members} />
       <ExpensesList expenses={expenses} participants={participants} />
       <SettlementsList settlements={settlements} />
-      <PendingPayments settlements={settlements} />
+      <PendingPayments pendingPayments={pendingPayments} />
 
       <ActionButtons openModal={openModal} />
 
