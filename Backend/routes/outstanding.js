@@ -15,44 +15,33 @@ router.post(
         return res.status(400).send("Both user IDs are required.");
       }
 
-      // Calculate the amount user1 owes user2
-      const user1OwesUser2 = await sql`
-              SELECT COALESCE(SUM(amount_owed), 0) AS total
-              FROM (
-                  SELECT amount_owed
-                  FROM expenses e
-                  JOIN expenseparticipants ep ON e.expense_id = ep.expense_id
-                  WHERE e.paid_by = ${user2_id} AND ep.user_id = ${user1_id}
-  
-                  UNION ALL
-  
-                  SELECT -amount
-                  FROM settlements
-                  WHERE payer_id = ${user1_id} AND payee_id = ${user2_id}
-              ) subquery;
-          `;
+      // Calculate net outstanding amount with a single query
+      const result = await sql`
+        WITH 
+          u1_owes_u2 AS (
+            SELECT COALESCE(SUM(ep.amount_owed), 0) - 
+                   COALESCE(SUM(s.amount), 0) AS net
+            FROM expenses e
+            JOIN expenseparticipants ep ON e.expense_id = ep.expense_id
+            LEFT JOIN settlements s 
+              ON s.payer_id = ${user1_id} AND s.payee_id = ${user2_id}
+            WHERE e.paid_by = ${user2_id} AND ep.user_id = ${user1_id}
+          ),
+          u2_owes_u1 AS (
+            SELECT COALESCE(SUM(ep.amount_owed), 0) - 
+                   COALESCE(SUM(s.amount), 0) AS net
+            FROM expenses e
+            JOIN expenseparticipants ep ON e.expense_id = ep.expense_id
+            LEFT JOIN settlements s 
+              ON s.payer_id = ${user2_id} AND s.payee_id = ${user1_id}
+            WHERE e.paid_by = ${user1_id} AND ep.user_id = ${user2_id}
+          )
+        SELECT 
+          (SELECT net FROM u1_owes_u2) - 
+          (SELECT net FROM u2_owes_u1) AS outstanding_amount
+      `;
 
-      // Calculate the amount user2 owes user1
-      const user2OwesUser1 = await sql`
-              SELECT COALESCE(SUM(amount_owed), 0) AS total
-              FROM (
-                  SELECT amount_owed
-                  FROM expenses e
-                  JOIN expenseparticipants ep ON e.expense_id = ep.expense_id
-                  WHERE e.paid_by = ${user1_id} AND ep.user_id = ${user2_id}
-  
-                  UNION ALL
-  
-                  SELECT -amount
-                  FROM settlements
-                  WHERE payer_id = ${user2_id} AND payee_id = ${user1_id}
-              ) subquery;
-          `;
-
-      const totalUser1Owes = user1OwesUser2[0].total;
-      const totalUser2Owes = user2OwesUser1[0].total;
-
-      const outstandingAmount = totalUser1Owes - totalUser2Owes;
+      const outstandingAmount = result[0].outstanding_amount;
 
       res.status(200).json({
         message: "Outstanding amount calculated successfully.",
@@ -62,14 +51,12 @@ router.post(
       });
     } catch (err) {
       console.error(err);
-      res
-        .status(500)
-        .send("An error occurred while calculating the outstanding amount.");
+      res.status(500).send("Error calculating outstanding amount.");
     }
   }
 );
 
-// Get all settlements of a group
+// Get all outstandings of a group
 router.get(
   "/groups/:groupId/outstanding",
   authenticateToken,
