@@ -3,9 +3,10 @@ import Banner from "./Banner";
 import { toast } from "react-toastify";
 import ToastContainerComponent from "./Toasts";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const baseUrl = import.meta.env.VITE_API_URL;
-console.log(`API Base URL ${baseUrl}`);
+//console.log(`API Base URL ${baseUrl}`);
 
 function Register() {
   const navigate = useNavigate();
@@ -74,7 +75,13 @@ function Register() {
   return (
     <div className="login-container">
       <Banner />
-      <div className="login-form register-form">
+      <motion.div
+        className="login-form register-form"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        //exit={{ opacity: 0, y: -20, transition: { duration: 0.5 } }}
+        transition={{ duration: 0.5 }}
+      >
         <form onSubmit={handleSubmit}>
           <input
             name="username"
@@ -124,7 +131,7 @@ function Register() {
             Have an account? <a href="/">Login</a>
           </p>
         </form>
-      </div>
+      </motion.div>
       <ToastContainerComponent />
     </div>
   );

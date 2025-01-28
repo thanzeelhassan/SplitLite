@@ -39,7 +39,8 @@ body {
   font-size: 2rem;
   margin-top: 0px;
 }
-
+.add-group-form input,
+.add-group-form textarea,
 .login-form input {
   width: 90%;
   height: 25px;
@@ -50,6 +51,12 @@ body {
   border: 0.1px solid rgb(181, 181, 181);
   border-radius: 5px;
 }
+.add-group-form textarea {
+  min-width: 90%;
+  max-width: 90%;
+  min-height: 25px;
+}
+.add-group-form button,
 .login-form button {
   width: 90%;
   background-color: #079a98;
@@ -78,18 +85,33 @@ body {
 .nav-bar {
   margin: 0;
   padding: 0;
-  width: 25%;
+  width: 25%; /* Sidebar width */
   background-color: #f1f1f1;
   height: 100%; /* Full height */
-  position: fixed; /* Make it stick, even on scroll */
-  overflow: auto; /* Enable scrolling if the sidenav has too much content */
+  position: fixed; /* Fixed positioning */
+  overflow: auto; /* Scroll if needed */
 }
+
+.content {
+  margin-left: 25%; /* Push content to the right of the navbar */
+  padding: 20px; /* Add some padding for better spacing */
+}
+
+.profile-details {
+  background: #ffffff; /* White background for contrast */
+  margin-top: 40px;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
 .nav-bar h1 {
   padding-left: 20px;
+  color: #079a98;
 }
 .nav-bar ul {
   list-style-type: none;
-  padding-left: 20px;
+  padding-left: 0px;
 }
 
 .nav-bar li a {
@@ -103,4 +125,152 @@ body {
 .nav-bar li a:hover {
   background-color: #555;
   color: white;
+}
+
+.nav-bar .active {
+  background-color: #079a98;
+  color: white;
+}
+
+.greeting {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  margin-right: 20px;
+  margin-left: auto;
+  float: right;
+}
+
+.groups-container {
+  padding: 20px;
+}
+
+.groups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.group-card {
+  background: #ffffff;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.group-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.group-card h3 {
+  margin-bottom: 2px;
+  color: #079a98;
+}
+.group-card .date {
+  margin-bottom: 10px;
+  margin-top: 0px;
+  color: #555;
+  font-size: 0.75rem;
+}
+.group-card .balance {
+  font-weight: bold;
+}
+
+.group-card p {
+  margin: 5px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.group-card strong {
+  color: #555;
+}
+
+.logo-round-image {
+  border-radius: 50%;
+  /* object-fit: cover;  Ensures the image fits properly */
+}
+
+.custom-button {
+  background-color: #079a98;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px; /* Initial padding for the button */
+  border-radius: 50px;
+  font-size: 30px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, padding 0.3s ease, width 0.3s ease; /* Smooth transition for background and padding */
+  position: fixed !important;
+  bottom: 40px !important;
+  right: 40px !important;
+  overflow: hidden;
+  height: 60px;
+  width: 60px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-button:hover {
+  padding: 8px 24px; /* Increase padding on hover to accommodate text */
+  width: 180px;
+}
+
+.custom-button .icon,
+.custom-button .text {
+  position: absolute;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.custom-button .icon {
+  opacity: 1; /* Show icon by default */
+  transform: translateX(0); /* Default position */
+}
+
+.custom-button .text {
+  opacity: 0; /* Hide text by default */
+  transform: translateX(-20px); /* Slide text slightly left */
+  transition-delay: 0.1s;
+}
+
+.custom-button:hover .icon {
+  opacity: 0; /* Fade out icon on hover */
+  transform: translateX(20px); /* Slide icon slightly right */
+}
+
+.custom-button:hover .text {
+  opacity: 1; /* Fade in text on hover */
+  transform: translateX(0); /* Slide text into place */
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.action-buttons button {
+  padding: 10px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.action-buttons button:hover {
+  background-color: #0056b3;
+}
+.add-group-form {
+  background-color: #ffffff;
+  height: auto;
+  color: black;
+  text-align: center;
+  padding: 10px;
+  padding-top: 30px;
+  border-radius: 5px;
+  width: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
