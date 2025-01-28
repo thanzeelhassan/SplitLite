@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import GroupDetails from "./GroupDetails"; // Import GroupDetails component
+import GroupDetails from "./GroupDetails";
 import AddGroup from "./AddGroup";
 //import '../../public/styles.css';
 

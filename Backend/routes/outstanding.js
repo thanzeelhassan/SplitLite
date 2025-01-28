@@ -193,4 +193,76 @@ router.post("/groupOutstanding", authenticateToken, async (req, res) => {
   }
 });
 
+router.post("/outstanding_to_user", authenticateToken, async (req, res) => {
+  try {
+    const { group_id, user_id } = req.body;
+
+    // Validate input
+    if (!group_id || !user_id) {
+      return res.status(400).send("Group ID and User ID are required.");
+    }
+
+    // Check user is in group
+    const [membership] = await sql`
+      SELECT 1 FROM GroupMembers 
+      WHERE group_id = ${group_id} AND user_id = ${user_id}
+    `;
+    if (!membership) return res.status(403).send("User not in group");
+
+    // Calculate receivables with optimized query
+    const receivables = await sql`
+      WITH group_users AS (
+        SELECT user_id FROM GroupMembers 
+        WHERE group_id = ${group_id} AND user_id <> ${user_id}
+      ),
+      expense_balances AS (
+        SELECT
+          ep.user_id AS debtor,
+          SUM(ep.amount_owed) FILTER (WHERE e.paid_by = ${user_id}) AS owed_to_user,
+          SUM(ep.amount_owed) FILTER (WHERE ep.user_id = ${user_id}) AS owed_by_user
+        FROM Expenses e
+        JOIN ExpenseParticipants ep ON e.expense_id = ep.expense_id
+        WHERE e.group_id = ${group_id}
+          AND (e.paid_by = ${user_id} OR ep.user_id = ${user_id})
+        GROUP BY ep.user_id
+      ),
+      settlement_balances AS (
+        SELECT
+          payer_id AS debtor,
+          SUM(amount) FILTER (WHERE payee_id = ${user_id}) AS settled_to_user,
+          SUM(amount) FILTER (WHERE payer_id = ${user_id}) AS settled_by_user
+        FROM Settlements
+        WHERE group_id = ${group_id}
+          AND (payee_id = ${user_id} OR payer_id = ${user_id})
+        GROUP BY payer_id
+      )
+      SELECT
+        gu.user_id AS debtor_id,
+        COALESCE(eb.owed_to_user, 0) 
+        - COALESCE(sb.settled_to_user, 0) 
+        - COALESCE(eb.owed_by_user, 0) 
+        + COALESCE(sb.settled_by_user, 0) AS amount
+      FROM group_users gu
+      LEFT JOIN expense_balances eb ON gu.user_id = eb.debtor
+      LEFT JOIN settlement_balances sb ON gu.user_id = sb.debtor
+      WHERE (COALESCE(eb.owed_to_user, 0) 
+           - COALESCE(sb.settled_to_user, 0) 
+           - COALESCE(eb.owed_by_user, 0) 
+           + COALESCE(sb.settled_by_user, 0)) > 0
+    `;
+
+    res.json({
+      group_id,
+      creditor_id: user_id,
+      receivables: receivables.map((row) => ({
+        debtor_id: row.debtor_id,
+        amount: row.amount,
+      })),
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error calculating user receivables");
+  }
+});
+
 module.exports = router;
