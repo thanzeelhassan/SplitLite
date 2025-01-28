@@ -1,6 +1,6 @@
 // Modals/AddMemberModal.jsx
 import React, { useState } from "react";
-import GroupService from "./GroupService";
+import GroupService from "../GroupService";
 
 export const AddMemberModal = ({ groupId, onSuccess, closeModal }) => {
   const [email, setEmail] = useState("");
@@ -40,3 +40,5 @@ export const AddMemberModal = ({ groupId, onSuccess, closeModal }) => {
     </div>
   );
 };
+
+export default AddMemberModal;

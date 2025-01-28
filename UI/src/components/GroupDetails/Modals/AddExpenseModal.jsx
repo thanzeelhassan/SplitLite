@@ -1,6 +1,6 @@
 // Modals/AddExpenseModal.jsx
 import React, { useState } from "react";
-import GroupService from "./GroupService";
+import GroupService from "../GroupService";
 
 export const AddExpenseModal = ({ groupId, onSuccess, closeModal }) => {
   const [expenseDetails, setExpenseDetails] = useState({
@@ -142,7 +142,9 @@ export const AddExpenseModal = ({ groupId, onSuccess, closeModal }) => {
         {isAdding ? "Adding..." : "Add Expense"}
       </button>
       <button onClick={closeModal}>Cancel</button>
-      {addError && <p className="error">{addError}</p>}
+      {error && <p className="error">{setError}</p>}
     </div>
   );
 };
+
+export default AddExpenseModal;

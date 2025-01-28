@@ -1,6 +1,6 @@
 // Modals/AddSettlementModal.jsx
 import React, { useState } from "react";
-import GroupService from "./GroupService";
+import GroupService from "../GroupService";
 
 export const AddSettlementModal = ({ groupId, onSuccess, closeModal }) => {
   const [settlementDetails, setSettlementDetails] = useState({
@@ -82,7 +82,9 @@ export const AddSettlementModal = ({ groupId, onSuccess, closeModal }) => {
         {isAdding ? "Adding..." : "Add Settlement"}
       </button>
       <button onClick={closeModal}>Cancel</button>
-      {addError && <p className="error">{addError}</p>}
+      {error && <p className="error">{setError}</p>}
     </div>
   );
 };
+
+export default AddSettlementModal;

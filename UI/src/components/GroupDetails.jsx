@@ -1,7 +1,7 @@
 // GroupDetails.jsx
 import React, { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import GroupService from "./GroupService";
+import GroupService from "./GroupDetails/GroupService";
 import AddExpenseModal from "./GroupDetails/Modals/AddExpenseModal";
 import AddMemberModal from "./GroupDetails/Modals/AddMemberModal";
 import AddSettlementModal from "./GroupDetails/Modals/AddSettlementModal";
