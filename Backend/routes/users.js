@@ -6,7 +6,7 @@ const authenticateToken = require("../middleware/authenticatetoken");
 const router = express.Router();
 
 // Get users count
-router.get("/users", async (req, res) => {
+router.get("/users", authenticateToken, async (req, res) => {
   const result = await sql`SELECT count(*) FROM users`;
   const { count } = result[0];
 
@@ -45,7 +45,7 @@ router.post("/register", async (req, res) => {
 });
 
 // Delete a user
-router.delete("/delete", async (req, res) => {
+router.delete("/delete_user", authenticateToken, async (req, res) => {
   console.log("Deleting user");
   try {
     const { username, email, phone, password } = req.body;

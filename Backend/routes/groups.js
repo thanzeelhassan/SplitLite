@@ -105,4 +105,39 @@ router.get("/groups/:groupId/members", authenticateToken, async (req, res) => {
   }
 });
 
+// Delete a group
+router.delete("/delete_group", authenticateToken, async (req, res) => {
+  console.log("Deleting group");
+  try {
+    const { group_name } = req.body;
+
+    if (!group_name) {
+      return res.status(400).send("Group name is required");
+    }
+
+    const user = await sql`
+      SELECT * FROM groups 
+      WHERE name = ${group_name} ;
+    `;
+    if (user.length === 0) {
+      return res.status(404).send("Group not found");
+    }
+
+    const result = await sql`
+      DELETE FROM groups 
+      WHERE group_id = ${group_id} 
+        AND name = ${name};
+    `;
+
+    if (result.length === 0) {
+      res.status(200).send(`Deleted group ${group_name}`);
+    } else {
+      res.status(400).send("Failed to delete group");
+    }
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error deleting group");
+  }
+});
+
 module.exports = router;
