@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import ToastContainerComponent from "./Toasts";
 import { toast } from "react-toastify";
 import Greeting from "./Greeting";
@@ -13,6 +13,7 @@ const baseUrl = import.meta.env.VITE_API_URL;
 function Dashboard() {
   const [activeNavItem, setActiveNavItem] = useState("groups");
   //const [user, setUser] = useState(null);
+  const [userId, setUserID] = useState(null);
   const [profileDetails, setProfileDetails] = useState({
     userName: "",
     email: "",
@@ -50,6 +51,7 @@ function Dashboard() {
         console.log(data.user);
         console.log(data.user.name);
         console.log(data.user.email);
+        setUserID(data.user.user_id);
         setProfileDetails((prev) => {
           return {
             userName: data.user.name,
@@ -169,7 +171,7 @@ function Dashboard() {
         {activeNavItem === "profile" && (
           <Profile profileDetails={profileDetails} />
         )}
-        {activeNavItem === "groups" && <Groups groupsDetails={groupsDetails} />}
+        {activeNavItem === "groups" && <Groups groupsDetails={groupsDetails} userId={userId}/>}
       </div>
     </motion.div>
   );
