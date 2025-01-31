@@ -20,7 +20,6 @@ function Dashboard() {
     phone: "",
   });
 
-  const [groupsDetails, setGroupsDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -63,38 +62,11 @@ function Dashboard() {
         console.error("Error:", error);
         toast.error("Something went wrong. Please try again.");
       } finally {
-        //setLoading(false); // End loading
-      }
-    };
-
-    const fetchGroupsDetails = async () => {
-      try {
-        setLoading(true); // Start loading
-        const token = localStorage.getItem("authToken");
-
-        const response = await fetch(`${baseUrl}/groups`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          toast.error(errorData.message || "Failed to load group details.");
-        }
-        const data = await response.json();
-        setGroupsDetails(data.groups);
-      } catch (error) {
-        console.error("Error:", error);
-        toast.error("Something went wrong. Please try again.");
-      } finally {
         setLoading(false); // End loading
       }
     };
 
     fetchProfileDetails();
-    fetchGroupsDetails();
   }, []); // Empty dependency array ensures this runs only once after the first render
 
   const handleLogout = async () => {
@@ -171,7 +143,7 @@ function Dashboard() {
         {activeNavItem === "profile" && (
           <Profile profileDetails={profileDetails} />
         )}
-        {activeNavItem === "groups" && <Groups groupsDetails={groupsDetails} userId={userId}/>}
+        {activeNavItem === "groups" && <Groups />}
       </div>
     </motion.div>
   );
