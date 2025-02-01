@@ -1,8 +1,10 @@
 import React from "react";
+import BackButton from "../BackButton";
 
 function GroupInfo({ group, onBackClick }) {
   return (
     <div
+      className="group-info"
       style={{
         marginTop: "30px",
         marginBottom: "20px",
@@ -11,7 +13,7 @@ function GroupInfo({ group, onBackClick }) {
         borderRadius: "8px",
       }}
     >
-      <button onClick={onBackClick}>Back to Groups</button>
+      <BackButton onClick={onBackClick} />
       <h2>{group.name}</h2>
       <p>
         <strong>Description:</strong> {group.description}

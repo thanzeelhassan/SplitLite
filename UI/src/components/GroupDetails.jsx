@@ -11,6 +11,7 @@ import SettlementsList from "./GroupDetails/SettlementsList";
 import ExpensesList from "./GroupDetails/ExpensesList";
 import MembersList from "./GroupDetails/MembersList";
 import GroupInfo from "./GroupDetails/GroupInfo";
+import HorizontalTabs from "./HorizontalTabs";
 
 function GroupDetails({ group, onBackClick }) {
   const [members, setMembers] = useState([]);
@@ -21,6 +22,7 @@ function GroupDetails({ group, onBackClick }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeModal, setActiveModal] = useState(null);
+  const [activeTab, setActiveTab] = useState("activities");
 
   const fetchGroupDetails = useCallback(async () => {
     try {
@@ -66,7 +68,9 @@ function GroupDetails({ group, onBackClick }) {
   useEffect(() => {
     fetchGroupDetails();
   }, [fetchGroupDetails]);
-
+  function handleTabClick(tabName) {
+    setActiveTab(tabName);
+  }
   const openModal = (modalName) => setActiveModal(modalName);
   const closeModal = () => setActiveModal(null);
 
@@ -76,11 +80,18 @@ function GroupDetails({ group, onBackClick }) {
   return (
     <motion.div className="group-detail-view">
       <GroupInfo group={group} onBackClick={onBackClick} />
-      <MembersList members={members} />
-      <ExpensesList expenses={expenses} participants={participants} />
-      <SettlementsList settlements={settlements} />
-      <PendingPayments pendingPayments={pendingPayments} />
+      <HorizontalTabs handleClick={handleTabClick} />
+      {activeTab === "memberlist" && <MembersList members={members} />}
+      {activeTab === "activities" && (
+        <div>
+          <ExpensesList expenses={expenses} participants={participants} />
+          <SettlementsList settlements={settlements} />
+        </div>
+      )}
 
+      {activeTab === "balances" && (
+        <PendingPayments pendingPayments={pendingPayments} />
+      )}
       <ActionButtons openModal={openModal} />
 
       {activeModal === "addMember" && (
