@@ -1,7 +1,9 @@
 const express = require("express");
 const sql = require("../config/database");
 const authenticateToken = require("../middleware/authenticatetoken");
+const { calculateUserReceivables } = require("../services/outstandingService");
 const router = express.Router();
+
 
 // Get the outstanding amount between two users
 router.post(
@@ -57,6 +59,7 @@ router.post(
 );
 
 // Get all outstandings of a group
+// this is wrong currently
 router.get(
   "/groups/:groupId/outstanding",
   authenticateToken,
@@ -92,6 +95,7 @@ router.get(
   }
 );
 
+// Get all balance of a group
 router.post("/groupOutstanding", authenticateToken, async (req, res) => {
   try {
     const { group_id } = req.body;

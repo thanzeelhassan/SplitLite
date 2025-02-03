@@ -101,10 +101,10 @@ function Groups() {
 
     if (group.balance > 0) {
       customStyle.color = "#2ba10e";
-      balanceDetails = `You are owed ${balance}`;
+      balanceDetails = `You are owed ${group.balance}`;
     } else if (group.balance < 0) {
       customStyle.color = "#dd3838";
-      balanceDetails = `You owe ${Math.abs(balance)}`;
+      balanceDetails = `You owe ${Math.abs(group.balance)}`;
     }
 
     return (

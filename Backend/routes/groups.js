@@ -1,6 +1,7 @@
 const express = require("express");
 const sql = require("../config/database");
 const authenticateToken = require("../middleware/authenticatetoken");
+const { calculateUserReceivables } = require("../services/outstandingService");
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
 router.get("/groups", authenticateToken, async (req, res) => {
   try {
     // Fetch all groups the user is part of
-    const result = await sql`
+    const groups = await sql`
       SELECT g.group_id, g.name, g.description, u.name as created_by, g.created_at 
       FROM groups g
       INNER JOIN groupmembers gm ON g.group_id = gm.group_id
@@ -17,13 +18,49 @@ router.get("/groups", authenticateToken, async (req, res) => {
       ORDER BY g.created_at DESC;
     `;
 
-    if (result.length === 0) {
+    if (groups.length === 0) {
       return res.status(404).json({ message: "No groups found." });
     }
 
+    // Fetch receivables for each group
+    let totalBalance = 0; // Total amount user owes
+    const groupsWithReceivables = await Promise.all(
+      groups.map(async (group) => {
+        try {
+          const receivables = await calculateUserReceivables(group.group_id);
+
+          let groupBalance = 0;
+          // Calculate how much the user owes in this group
+          const userDebt = receivables.outstanding_balances
+            .filter((balance) => balance.debtor_id === req.user.user_id)
+            .reduce((sum, balance) => sum + balance.amount, 0);
+
+          groupBalance += userDebt; // Accumulate across all groups
+
+          // Calculate how much the user owes in this group
+          const userCredit = receivables.outstanding_balances
+            .filter((balance) => balance.creditor_id === req.user.user_id)
+            .reduce((sum, balance) => sum + balance.amount, 0);
+
+          groupBalance -= userCredit; // Accumulate across all groups
+
+          totalBalance += groupBalance;
+          return {
+            ...group,
+            outstanding_balances: receivables.outstanding_balances,
+            balance: groupBalance,
+          };
+        } catch (err) {
+          console.error(`Error for group ${group.group_id}:`, err);
+          return group; // Return group without receivables on error
+        }
+      })
+    );
+
     res.status(200).json({
       message: "Groups retrieved successfully.",
-      groups: result,
+      totalBalance: totalBalance, // Total amount user owes
+      groups: groupsWithReceivables,
     });
   } catch (err) {
     console.error(err);
