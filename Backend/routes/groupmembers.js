@@ -31,4 +31,32 @@ router.post("/groupmembers", authenticateToken, async (req, res) => {
   }
 });
 
+// Get all members of a group
+router.get("/groups/:groupId/members", authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    const result = await sql`
+      SELECT u.user_id, u.name, u.email
+      FROM users u
+      INNER JOIN groupmembers gm ON u.user_id = gm.user_id
+      WHERE gm.group_id = ${groupId};
+    `;
+
+    if (result.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No members found for this group." });
+    }
+
+    res.status(200).json({
+      message: "Members retrieved successfully.",
+      members: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred while fetching group members.");
+  }
+});
+
 module.exports = router;
