@@ -4,7 +4,6 @@ const authenticateToken = require("../middleware/authenticatetoken");
 const { calculateUserReceivables } = require("../services/outstandingService");
 const router = express.Router();
 
-
 // Get the outstanding amount between two users
 router.post(
   "/outstandingBetween2Users",
@@ -67,30 +66,93 @@ router.get(
     try {
       const { groupId } = req.params;
 
-      const result = await sql`
-        SELECT s.settlement_id, s.payer_id, s.payee_id, s.amount, s.created_at, 
-        u.user_id as user_id_payer, u.name as name_payer, 
-        u2.user_id as user_id_payee, u2.name as name_payee
-        FROM settlements s
-        INNER JOIN users u ON u.user_id = s.payer_id
-        INNER JOIN users u2 ON u2.user_id = s.payee_id
-        WHERE s.group_id = ${groupId}
-        ORDER BY s.created_at DESC;
+      // Calculate balances using optimized SQL
+      const balances = await sql`
+        WITH user_pairs AS (
+          SELECT u1.user_id AS user1, u2.user_id AS user2
+          FROM groupmembers u1
+          JOIN groupmembers u2 ON u1.group_id = u2.group_id 
+            AND u1.user_id < u2.user_id
+          WHERE u1.group_id = ${groupId}
+        ),
+        expense_balances AS (
+          SELECT
+            e.paid_by,
+            ep.user_id AS participant,
+            SUM(ep.amount_owed) AS owed
+          FROM expenses e
+          JOIN expenseparticipants ep ON e.expense_id = ep.expense_id
+          WHERE e.group_id = ${groupId}
+          GROUP BY e.paid_by, ep.user_id
+        ),
+        settlement_balances AS (
+          SELECT
+            payer_id,
+            payee_id,
+            SUM(amount) AS settled
+          FROM settlements
+          WHERE group_id = ${groupId}
+          GROUP BY payer_id, payee_id
+        )
+        SELECT
+          p.user1,
+          p.user2,
+          COALESCE(SUM(
+            CASE
+              WHEN eb.paid_by = p.user2 AND eb.participant = p.user1 THEN eb.owed
+              WHEN eb.paid_by = p.user1 AND eb.participant = p.user2 THEN -eb.owed
+              ELSE 0
+            END
+          ), 0) -
+          COALESCE(SUM(
+            CASE
+              WHEN sb.payer_id = p.user1 AND sb.payee_id = p.user2 THEN sb.settled
+              WHEN sb.payer_id = p.user2 AND sb.payee_id = p.user1 THEN -sb.settled
+              ELSE 0
+            END
+          ), 0) AS net_balance
+        FROM user_pairs p
+        LEFT JOIN expense_balances eb ON
+          (eb.paid_by = p.user1 AND eb.participant = p.user2) OR
+          (eb.paid_by = p.user2 AND eb.participant = p.user1)
+        LEFT JOIN settlement_balances sb ON
+          (sb.payer_id = p.user1 AND sb.payee_id = p.user2) OR
+          (sb.payer_id = p.user2 AND sb.payee_id = p.user1)
+        GROUP BY p.user1, p.user2
+        HAVING ABS(
+          COALESCE(SUM(
+            CASE
+              WHEN eb.paid_by = p.user2 AND eb.participant = p.user1 THEN eb.owed
+              WHEN eb.paid_by = p.user1 AND eb.participant = p.user2 THEN -eb.owed
+              ELSE 0
+            END
+          ), 0) -
+          COALESCE(SUM(
+            CASE
+              WHEN sb.payer_id = p.user1 AND sb.payee_id = p.user2 THEN sb.settled
+              WHEN sb.payer_id = p.user2 AND sb.payee_id = p.user1 THEN -sb.settled
+              ELSE 0
+            END
+          ), 0)
+        ) > 0
       `;
 
-      // Always return a 200 response, with an empty array if no settlements are found
-      res.status(200).json({
-        message:
-          result.length > 0
-            ? "Settlements retrieved successfully."
-            : "No settlements found for this group.",
-        outstanding: result,
+      // Format the results
+      const formatted = balances.map((row) => ({
+        debtor_id: row.net_balance > 0 ? row.user1 : row.user2,
+        creditor_id: row.net_balance > 0 ? row.user2 : row.user1,
+        amount: Math.abs(row.net_balance),
+      }));
+
+      res.json({
+        groupId,
+        outstanding: formatted,
       });
     } catch (err) {
       console.error(err);
       res
         .status(500)
-        .send("An error occurred while fetching group settlements.");
+        .send("An error occurred while fetching group Outstanding.");
     }
   }
 );
