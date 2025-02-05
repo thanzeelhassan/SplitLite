@@ -4,6 +4,21 @@ const authenticateToken = require("../middleware/authenticatetoken");
 const { calculateUserReceivables } = require("../services/outstandingService");
 const router = express.Router();
 
+user_dictionary = {
+  11: {
+    Name: "thanzeelhassan",
+    Email: "thanzeelhassan@gmail.com",
+  },
+  13: {
+    Name: "kiran",
+    Email: "kiranpradeep499@gmail.com",
+  },
+  24: {
+    Name: "test",
+    Email: "test@gmail.com",
+  },
+};
+
 // Get the outstanding amount between two users
 router.post(
   "/outstandingBetween2Users",
@@ -144,9 +159,18 @@ router.get(
         amount: Math.abs(row.net_balance),
       }));
 
+      // Format the results with both ID and Name
+      const formattedWithDetails = formatted.map((row) => ({
+        debtor_id: row.debtor_id,
+        debtor_name: user_dictionary[row.debtor_id]?.Name || "Unknown",
+        creditor_id: row.creditor_id,
+        creditor_name: user_dictionary[row.creditor_id]?.Name || "Unknown",
+        amount: row.amount,
+      }));
+
       res.json({
         groupId,
-        outstanding: formatted,
+        outstanding: formattedWithDetails,
       });
     } catch (err) {
       console.error(err);

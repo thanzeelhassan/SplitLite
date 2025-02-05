@@ -22,45 +22,45 @@ router.get("/groups", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "No groups found." });
     }
 
-    // Fetch receivables for each group
-    let totalBalance = 0; // Total amount user owes
-    const groupsWithReceivables = await Promise.all(
-      groups.map(async (group) => {
-        try {
-          const receivables = await calculateUserReceivables(group.group_id);
+    // // Fetch receivables for each group
+    // let totalBalance = 0; // Total amount user owes
+    // const groupsWithReceivables = await Promise.all(
+    //   groups.map(async (group) => {
+    //     try {
+    //       const receivables = await calculateUserReceivables(group.group_id);
 
-          let groupBalance = 0;
-          // Calculate how much the user owes in this group
-          const userDebt = receivables.outstanding_balances
-            .filter((balance) => balance.debtor_id === req.user.user_id)
-            .reduce((sum, balance) => sum + balance.amount, 0);
+    //       let groupBalance = 0;
+    //       // Calculate how much the user owes in this group
+    //       const userDebt = receivables.outstanding_balances
+    //         .filter((balance) => balance.debtor_id === req.user.user_id)
+    //         .reduce((sum, balance) => sum + balance.amount, 0);
 
-          groupBalance += userDebt; // Accumulate across all groups
+    //       groupBalance += userDebt; // Accumulate across all groups
 
-          // Calculate how much the user owes in this group
-          const userCredit = receivables.outstanding_balances
-            .filter((balance) => balance.creditor_id === req.user.user_id)
-            .reduce((sum, balance) => sum + balance.amount, 0);
+    //       // Calculate how much the user owes in this group
+    //       const userCredit = receivables.outstanding_balances
+    //         .filter((balance) => balance.creditor_id === req.user.user_id)
+    //         .reduce((sum, balance) => sum + balance.amount, 0);
 
-          groupBalance -= userCredit; // Accumulate across all groups
+    //       groupBalance -= userCredit; // Accumulate across all groups
 
-          totalBalance += groupBalance;
-          return {
-            ...group,
-            outstanding_balances: receivables.outstanding_balances,
-            balance: groupBalance,
-          };
-        } catch (err) {
-          console.error(`Error for group ${group.group_id}:`, err);
-          return group; // Return group without receivables on error
-        }
-      })
-    );
+    //       totalBalance += groupBalance;
+    //       return {
+    //         ...group,
+    //         outstanding_balances: receivables.outstanding_balances,
+    //         balance: groupBalance,
+    //       };
+    //     } catch (err) {
+    //       console.error(`Error for group ${group.group_id}:`, err);
+    //       return group; // Return group without receivables on error
+    //     }
+    //   })
+    // );
 
     res.status(200).json({
       message: "Groups retrieved successfully.",
-      totalBalance: totalBalance, // Total amount user owes
-      groups: groupsWithReceivables,
+      // totalBalance: totalBalance, // Total amount user owes
+      groups: groups,
     });
   } catch (err) {
     console.error(err);

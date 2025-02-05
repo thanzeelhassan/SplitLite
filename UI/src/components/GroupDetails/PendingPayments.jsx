@@ -19,8 +19,8 @@ function PendingPayments(props) {
                 borderRadius: "8px",
               }}
             >
-              {pendingPayment.debtor_id} need to pay {pendingPayment.creditor_id} -{" "}
-              {pendingPayment.amount}{" "}
+              {pendingPayment.debtor_name} owes{" "}
+              {pendingPayment.creditor_name} - {pendingPayment.amount}{" "}
             </li>
           ))
         ) : (
