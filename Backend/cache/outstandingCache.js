@@ -8,4 +8,4 @@ function getOutstandings(groupId) {
   return outstandingCache[groupId] || [];
 }
 
-export default { storeOutstandings, getOutstandings };
+module.exports = { storeOutstandings, getOutstandings };

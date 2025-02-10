@@ -8,4 +8,4 @@ function getSettlements(groupId) {
   return settlementsCache[groupId] || [];
 }
 
-export default { storeSettlements, getSettlements };
+module.exports = { storeSettlements, getSettlements };

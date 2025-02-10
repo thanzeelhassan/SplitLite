@@ -8,4 +8,4 @@ function getGroups(userId) {
   return groupsCache[userId] || [];
 }
 
-export default { storeGroups, getGroups };
+module.exports =  { storeGroups, getGroups };

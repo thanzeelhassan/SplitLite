@@ -8,4 +8,4 @@ function getExpenses(groupId) {
   return expensesCache[groupId] || [];
 }
 
-export default { storeExpenses, getExpenses };
+module.exports =  { storeExpenses, getExpenses };
