@@ -1,7 +1,8 @@
 const express = require("express");
 const sql = require("../config/database");
 const authenticateToken = require("../middleware/authenticatetoken");
-const { getCachedItems } = require("../services/getAllCachedData");
+const { calculate } = require("../services/calculationService");
+
 const router = express.Router();
 
 // Get all balance of a group
@@ -9,9 +10,7 @@ router.post("/calculations", authenticateToken, async (req, res) => {
   try {
     const { group_id } = req.body;
 
-    const receivables = await getCachedItems(group_id);
-
-
+    const receivables = await calculate(group_id);
 
     res.json({
       group_id: group_id,
