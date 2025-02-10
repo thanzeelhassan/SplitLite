@@ -4,8 +4,8 @@ function storeExpenseParticipants(groupId, expenseParticipants) {
   expenseParticipantCache[groupId] = expenseParticipants;
 }
 
-function getExpenseParticipantCache(groupId) {
+function getExpenseParticipants(groupId) {
   return expenseParticipantCache[groupId] || [];
 }
 
-module.exports = { storeExpenseParticipants, getExpenseParticipantCache };
+module.exports = { storeExpenseParticipants, getExpenseParticipants };

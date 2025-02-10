@@ -3,7 +3,7 @@ const sql = require("../config/database");
 const authenticateToken = require("../middleware/authenticatetoken");
 const {
   storeExpenseParticipants,
-  getExpenseParticipantCache,
+  getExpenseParticipants,
 } = require("../cache/expenseParticipantsCache");
 
 const router = express.Router();
@@ -17,7 +17,7 @@ router.get(
       const { groupId } = req.params;
 
       // Check cache first
-      const cachedExpenseParticipants = getExpenseParticipantCache(groupId);
+      const cachedExpenseParticipants = getExpenseParticipants(groupId);
       if (cachedExpenseParticipants.length > 0) {
         return res.status(200).json({
           message: "Expense participants details retrieved from cache.",
