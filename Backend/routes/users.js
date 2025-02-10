@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const sql = require("../config/database");
 const authenticateToken = require("../middleware/authenticatetoken");
+const { storeEmails, getEmails } = require("../cache/emailCache");
 
 const router = express.Router();
 
@@ -95,6 +96,15 @@ router.post("/users/email", authenticateToken, async (req, res) => {
   try {
     const { email } = req.body;
 
+    // Check cache first
+    const cachedUser = getEmails(email);
+    if (cachedUser.length > 0) {
+      return res.status(200).json({
+        message: "User details retrieved from cache.",
+        user: cachedUser,
+      });
+    }
+
     const result = await sql`
         SELECT user_id, name, email, phone_number, created_at 
         FROM users
@@ -106,9 +116,12 @@ router.post("/users/email", authenticateToken, async (req, res) => {
     }
 
     const user = result[0];
+    // Store results in cache
+    storeEmails(email, user);
+
     res.status(201).json({
       message: "User details fetched successfully.",
-      user,
+      user: user,
     });
   } catch (err) {
     console.error(err);

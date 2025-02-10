@@ -2,12 +2,26 @@ const express = require("express");
 const sql = require("../config/database");
 const authenticateToken = require("../middleware/authenticatetoken");
 const { calculateUserReceivables } = require("../services/outstandingService");
+const {
+  storeGroups,
+  getGroups,
+} = require("../cache/groupCache");
 
 const router = express.Router();
 
 // Get all groups a user is part of
 router.get("/groups", authenticateToken, async (req, res) => {
   try {
+
+    // Check cache first
+    const cachedGroups = getGroups(req.user.user_id);
+    if (cachedGroups.length > 0) {
+      return res.status(200).json({
+        message: "Groups retrieved from cache.",
+        groups: cachedGroups,
+      });
+    }
+
     // Fetch all groups the user is part of
     const groups = await sql`
       SELECT g.group_id, g.name, g.description, u.name as created_by, g.created_at 
@@ -22,6 +36,9 @@ router.get("/groups", authenticateToken, async (req, res) => {
       return res.status(404).json({ message: "No groups found." });
     }
 
+    // Store results in cache
+    storeGroups(req.user.user_id, cachedGroups);    
+        
     // // Fetch receivables for each group
     // let totalBalance = 0; // Total amount user owes
     // const groupsWithReceivables = await Promise.all(
