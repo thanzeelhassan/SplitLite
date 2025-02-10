@@ -2,19 +2,16 @@ const express = require("express");
 const sql = require("../config/database");
 const authenticateToken = require("../middleware/authenticatetoken");
 const { calculateUserReceivables } = require("../services/outstandingService");
-const {calculateOutstanding} = require("../services/getAllCachedData");
+const { calculateOutstanding } = require("../services/getAllCachedData");
 
-const {
-  storeGroups,
-  getGroups,
-} = require("../cache/groupCache");
+const { storeGroups, getGroups } = require("../cache/groupCache");
+const { calculate } = require("../services/calculationService");
 
 const router = express.Router();
 
 // Get all groups a user is part of
 router.get("/groups", authenticateToken, async (req, res) => {
   try {
-
     // Check cache first
     const cachedGroups = getGroups(req.user.user_id);
     if (cachedGroups.length > 0) {
@@ -39,12 +36,40 @@ router.get("/groups", authenticateToken, async (req, res) => {
     }
 
     // Store results in cache
-    storeGroups(req.user.user_id, cachedGroups);    
+    storeGroups(req.user.user_id, cachedGroups);
+
+    const groupsWithBalance = await Promise.all(
+      groups.map(async (group) => {
+        try {
+          const receivables = await calculate(group.group_id);
+
+          let groupBalance = 0;
+
+          if (receivables && receivables.length > 0) {
+            const userReceivable = receivables.find(
+              (r) => r.user_id === req.user.user_id
+            );
+
+            if (userReceivable) {
+              groupBalance = parseFloat(userReceivable.balance);
+            }
+          }
+
+          return {
+            ...group,
+            balance: groupBalance,
+          };
+        } catch (err) {
+          console.error(`Error for group ${group.group_id}:`, err);
+          return group; // Return group without receivables on error
+        }
+      })
+    );
 
     res.status(200).json({
       message: "Groups retrieved successfully.",
       // totalBalance: totalBalance, // Total amount user owes
-      groups: groups,
+      groups: groupsWithBalance,
     });
   } catch (err) {
     console.error(err);

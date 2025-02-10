@@ -35,7 +35,7 @@ async function calculate(groupId) {
   }
 
   const receivables = calculateOutstanding(groupData);
-  return { receivables };
+  return receivables;
 }
 
 function calculateOutstanding(groupData) {
