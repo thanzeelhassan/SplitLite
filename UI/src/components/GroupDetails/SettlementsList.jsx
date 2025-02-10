@@ -9,7 +9,7 @@ function SettlementsList({ settlements }) {
         {settlements.length > 0 ? (
           settlements.map((settlement) => (
             <li
-              key={settlement.id}
+              key={settlement.settlement_id}
               style={{
                 marginBottom: "10px",
                 padding: "15px",

@@ -14,7 +14,7 @@ function MembersList({ members }) {
         {members.length > 0 ? (
           members.map((member) => (
             <li
-              key={member.id}
+              key={member.user_id}
               style={{
                 marginBottom: "10px",
                 padding: "15px",
