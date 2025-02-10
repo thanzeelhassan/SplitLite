@@ -1,6 +1,7 @@
 const express = require("express");
 const sql = require("../config/database");
 const authenticateToken = require("../middleware/authenticatetoken");
+const { storeExpenses, getExpenses } = require("../cache/expensesCache");
 
 const router = express.Router();
 
@@ -9,6 +10,15 @@ router.get("/groups/:groupId/expenses", authenticateToken, async (req, res) => {
   try {
     const { groupId } = req.params;
 
+    // Check cache first
+    const cachedExpenses = getExpenses(groupId);
+    if (cachedExpenses.length > 0) {
+      return res.status(200).json({
+        message: "Expenses details retrieved from cache.",
+        expenses: cachedExpenses,
+      });
+    }
+
     const result = await sql`
       SELECT e.expense_id, e.paid_by, e.amount, e.description, e.created_at, u.name, u.user_id
       FROM expenses e
@@ -16,6 +26,9 @@ router.get("/groups/:groupId/expenses", authenticateToken, async (req, res) => {
       WHERE e.group_id = ${groupId}
       ORDER BY e.created_at DESC;
     `;
+
+    // Store results in cache
+    storeExpenses(groupId, result);
 
     // Always return a 200 response, with an empty array if no expenses are found
     res.status(200).json({
