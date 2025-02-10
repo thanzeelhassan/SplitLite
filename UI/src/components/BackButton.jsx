@@ -6,7 +6,7 @@ function BackButton(props) {
     <button
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
-      class="back-button"
+      className="back-button"
       onClick={props.onClick}
     >
       &#11148; Back
