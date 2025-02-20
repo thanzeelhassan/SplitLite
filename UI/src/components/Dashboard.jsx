@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import ToastContainerComponent from "./Toasts";
 import { toast } from "react-toastify";
 import Greeting from "./Greeting";
@@ -13,13 +13,13 @@ const baseUrl = import.meta.env.VITE_API_URL;
 function Dashboard() {
   const [activeNavItem, setActiveNavItem] = useState("groups");
   //const [user, setUser] = useState(null);
+  const [userId, setUserID] = useState(null);
   const [profileDetails, setProfileDetails] = useState({
     userName: "",
     email: "",
     phone: "",
   });
 
-  const [groupsDetails, setGroupsDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -50,6 +50,7 @@ function Dashboard() {
         console.log(data.user);
         console.log(data.user.name);
         console.log(data.user.email);
+        setUserID(data.user.user_id);
         setProfileDetails((prev) => {
           return {
             userName: data.user.name,
@@ -61,38 +62,11 @@ function Dashboard() {
         console.error("Error:", error);
         toast.error("Something went wrong. Please try again.");
       } finally {
-        //setLoading(false); // End loading
-      }
-    };
-
-    const fetchGroupsDetails = async () => {
-      try {
-        setLoading(true); // Start loading
-        const token = localStorage.getItem("authToken");
-
-        const response = await fetch(`${baseUrl}/groups`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!response.ok) {
-          const errorData = await response.json();
-          toast.error(errorData.message || "Failed to load group details.");
-        }
-        const data = await response.json();
-        setGroupsDetails(data.groups);
-      } catch (error) {
-        console.error("Error:", error);
-        toast.error("Something went wrong. Please try again.");
-      } finally {
         setLoading(false); // End loading
       }
     };
 
     fetchProfileDetails();
-    fetchGroupsDetails();
   }, []); // Empty dependency array ensures this runs only once after the first render
 
   const handleLogout = async () => {
@@ -169,7 +143,7 @@ function Dashboard() {
         {activeNavItem === "profile" && (
           <Profile profileDetails={profileDetails} />
         )}
-        {activeNavItem === "groups" && <Groups groupsDetails={groupsDetails} />}
+        {activeNavItem === "groups" && <Groups />}
       </div>
     </motion.div>
   );

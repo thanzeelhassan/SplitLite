@@ -1,13 +1,85 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import GroupDetails from "./GroupDetails"; // Import GroupDetails component
+import GroupDetails from "./GroupDetails";
 import AddGroup from "./AddGroup";
 //import '../../public/styles.css';
 
-function Groups({ groupsDetails }) {
+const baseUrl = import.meta.env.VITE_API_URL;
+
+function Groups() {
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [addButtonClick, setAddButtonClick] = useState(false);
   const [hover, setHover] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [groupsDetails, setGroupsDetails] = useState([]);
+
+  // Fetch balances when groups or userId changes
+  useEffect(() => {
+    // const fetchBalances = async () => {
+    //   if (!groupsDetails || !userId) return;
+
+    //   setIsLoading(true);
+    //   try {
+    //     const token = localStorage.getItem("authToken");
+    //     const requests = groupsDetails.map((group) =>
+    //       fetch(`${baseUrl}/outstanding_to_user`, {
+    //         method: "POST",
+    //         headers: {
+    //           "Content-Type": "application/json",
+    //           Authorization: `Bearer ${token}`,
+    //         },
+    //         body: JSON.stringify({
+    //           group_id: group.group_id,
+    //           user_id: userId,
+    //         }),
+    //       }).then((res) => res.json())
+    //     );
+
+    //     const responses = await Promise.all(requests);
+    //     const balances = {};
+    //     responses.forEach((data, index) => {
+    //       const group = groupsDetails[index];
+    //       const total = data.receivables.reduce(
+    //         (sum, item) => sum + parseFloat(item.amount),
+    //         0
+    //       );
+    //       balances[group.group_id] = total;
+    //     });
+    //     setGroupBalances(balances);
+    //   } catch (error) {
+    //     console.error("Error fetching balances:", error);
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    // };
+
+    // fetchBalances();
+
+    const fetchGroupsDetails = async () => {
+      try {
+        const token = localStorage.getItem("authToken");
+        const response = await fetch(`${baseUrl}/groups`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          toast.error(errorData.message || "Failed to load group details.");
+        }
+        const data = await response.json();
+        setGroupsDetails(data.groups);
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error("Something went wrong. Please try again.");
+      } finally {
+        setIsLoading(false); // End loading
+      }
+    };
+    fetchGroupsDetails();
+  }, []);
 
   const handleCardClick = (group) => {
     setSelectedGroup(group);
@@ -16,21 +88,25 @@ function Groups({ groupsDetails }) {
   const handleGroupDetailBackClick = () => {
     setSelectedGroup(null);
   };
+
   function handleAddGroupBackClick() {
     setAddButtonClick(false);
   }
+
   function createGroupCard(group) {
     const customStyle = {
-      color: "#e14343",
+      color: "#333333",
     };
-    let balanceDetails = "You owe " + Math.abs(group.balance);
+    let balanceDetails = "You are all settled up!";
+
     if (group.balance > 0) {
       customStyle.color = "#2ba10e";
-      balanceDetails = "You are owed " + group.balance;
-    } else if (group.balance == 0) {
-      customStyle.color = "#333333";
-      balanceDetails = "You are all settled up!";
+      balanceDetails = `You are owed ${group.balance}`;
+    } else if (group.balance < 0) {
+      customStyle.color = "#dd3838";
+      balanceDetails = `You owe ${Math.abs(group.balance)}`;
     }
+
     return (
       <div
         key={group.group_id}
@@ -46,6 +122,7 @@ function Groups({ groupsDetails }) {
       </div>
     );
   }
+
   if (selectedGroup) {
     return (
       <GroupDetails
@@ -66,7 +143,9 @@ function Groups({ groupsDetails }) {
           transition={{ duration: 0.5 }}
         >
           <h2>Groups</h2>
-          {groupsDetails && groupsDetails.length > 0 ? (
+          {isLoading ? (
+            <p>Loading groups...</p>
+          ) : groupsDetails && groupsDetails.length > 0 ? (
             <div className="groups-grid">
               {groupsDetails.map(createGroupCard)}
             </div>

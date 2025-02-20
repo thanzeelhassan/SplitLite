@@ -1,6 +1,7 @@
 const express = require("express");
 const sql = require("../config/database");
 const authenticateToken = require("../middleware/authenticatetoken");
+const { storeGroupMembers, getGroupMembers } = require("../cache/groupMembersCache");
 
 const router = express.Router();
 
@@ -28,6 +29,46 @@ router.post("/groupmembers", authenticateToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("An error occurred while adding the group member.");
+  }
+});
+
+// Get all members of a group
+router.get("/groups/:groupId/members", authenticateToken, async (req, res) => {
+  try {
+    const { groupId } = req.params;
+
+    // Check cache first
+    const cachedGroupMembers = getGroupMembers(groupId);
+    if (cachedGroupMembers.length > 0) {
+      return res.status(200).json({
+        message: "Group members details retrieved from cache.",
+        members: cachedGroupMembers,
+      });
+    }
+
+    const result = await sql`
+      SELECT u.user_id, u.name, u.email
+      FROM users u
+      INNER JOIN groupmembers gm ON u.user_id = gm.user_id
+      WHERE gm.group_id = ${groupId};
+    `;
+
+    if (result.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No members found for this group." });
+    }
+
+    // Store cache
+    storeGroupMembers(groupId, result)
+
+    res.status(200).json({
+      message: "Members retrieved successfully.",
+      members: result,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("An error occurred while fetching group members.");
   }
 });
 

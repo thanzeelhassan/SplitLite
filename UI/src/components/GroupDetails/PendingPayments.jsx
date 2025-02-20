@@ -2,16 +2,16 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 function PendingPayments(props) {
-  const settlements = props.settlements;
+  const pendingPayments = props.pendingPayments;
   return (
     <motion.div className="group-detail-view">
       {/* Pending Payments section */}
       <h2>Pending Payments</h2>
       <ul style={{ listStyle: "none", padding: 0 }}>
-        {settlements.length > 0 ? (
-          settlements.map((settlement) => (
+        {pendingPayments.length > 0 ? (
+          pendingPayments.map((pendingPayment) => (
             <li
-              key={settlement.id}
+              key={pendingPayment.debtor_id}
               style={{
                 marginBottom: "10px",
                 padding: "15px",
@@ -19,12 +19,12 @@ function PendingPayments(props) {
                 borderRadius: "8px",
               }}
             >
-              {settlement.name_payer} paid {settlement.name_payee} -{" "}
-              {settlement.amount}{" "}
+              {pendingPayment.debtor_name} owes{" "}
+              {pendingPayment.creditor_name} - {pendingPayment.amount}{" "}
             </li>
           ))
         ) : (
-          <p>No settlements found.</p>
+          <p>No pending Payments found.</p>
         )}
       </ul>
     </motion.div>

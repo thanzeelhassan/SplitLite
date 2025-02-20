@@ -40,6 +40,19 @@ class GroupService {
     return data.settlements;
   }
 
+  static async fetchPendingPayments(groupId, token) {
+    const response = await fetch(`${baseUrl}/groups/${groupId}/outstanding`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) throw new Error("Failed to fetch outstanding");
+    const data = await response.json();
+    return data.outstanding;
+  }
+
   static async getUserIdByEmail(email, token) {
     const response = await fetch(`${baseUrl}/users/email`, {
       method: "POST",
