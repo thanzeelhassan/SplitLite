@@ -1,6 +1,10 @@
 const express = require("express");
 const sql = require("../config/database");
 const authenticateToken = require("../middleware/authenticatetoken");
+const {
+  storeSettlements,
+  getSettlements,
+} = require("../cache/settlementCache");
 
 const router = express.Router();
 
@@ -38,6 +42,15 @@ router.get(
     try {
       const { groupId } = req.params;
 
+      // Check cache first
+      const cachedSettlements = getSettlements(groupId);
+      if (cachedSettlements.length > 0) {
+        return res.status(200).json({
+          message: "Settlements retrieved from cache.",
+          settlements: cachedSettlements,
+        });
+      }
+
       const result = await sql`
         SELECT s.settlement_id, s.payer_id, s.payee_id, s.amount, s.created_at, 
         u.user_id as user_id_payer, u.name as name_payer, 
@@ -49,19 +62,20 @@ router.get(
         ORDER BY s.created_at DESC;
       `;
 
+      // Store results in cache
+      storeSettlements(groupId, result);
       // Always return a 200 response, with an empty array if no settlements are found
+
       res.status(200).json({
         message:
           result.length > 0
             ? "Settlements retrieved successfully."
-            : "No settlements found for this group.",
+            : "No settlements found.",
         settlements: result,
       });
     } catch (err) {
       console.error(err);
-      res
-        .status(500)
-        .send("An error occurred while fetching group settlements.");
+      res.status(500).send("Error fetching settlements.");
     }
   }
 );

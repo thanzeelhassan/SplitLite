@@ -24,6 +24,7 @@ const expenseRoutes = require("./routes/expenses");
 const settlementRoutes = require("./routes/settlements");
 const expenseparticipantsRoutes = require("./routes/expenseparticipants");
 const outstandingRoutes = require("./routes/outstanding");
+const calculationsRoutes = require("./routes/calculations");
 
 // Use routes
 app.use("/", authRoutes);
@@ -34,6 +35,7 @@ app.use("/", expenseRoutes);
 app.use("/", settlementRoutes);
 app.use("/", expenseparticipantsRoutes);
 app.use("/", outstandingRoutes);
+app.use("/", calculationsRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to SplitLite");

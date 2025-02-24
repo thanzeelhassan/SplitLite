@@ -11,7 +11,7 @@ function PendingPayments(props) {
         {pendingPayments.length > 0 ? (
           pendingPayments.map((pendingPayment) => (
             <li
-              key={pendingPayment.id}
+              key={pendingPayment.debtor_id}
               style={{
                 marginBottom: "10px",
                 padding: "15px",
@@ -19,8 +19,8 @@ function PendingPayments(props) {
                 borderRadius: "8px",
               }}
             >
-              {pendingPayment.name_payer} paid {pendingPayment.name_payee} -{" "}
-              {pendingPayment.amount}{" "}
+              {pendingPayment.debtor_name} owes{" "}
+              {pendingPayment.creditor_name} - {pendingPayment.amount}{" "}
             </li>
           ))
         ) : (

@@ -48,7 +48,7 @@ class GroupService {
         Authorization: `Bearer ${token}`,
       },
     });
-    if (!response.ok) throw new Error("Failed to fetch settlements");
+    if (!response.ok) throw new Error("Failed to fetch outstanding");
     const data = await response.json();
     return data.outstanding;
   }
