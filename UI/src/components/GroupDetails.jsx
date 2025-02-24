@@ -80,43 +80,45 @@ function GroupDetails({ group, onBackClick }) {
   return (
     <motion.div className="group-detail-view">
       <GroupInfo group={group} onBackClick={onBackClick} />
-      <HorizontalTabs handleClick={handleTabClick} />
-      {activeTab === "memberlist" && <MembersList members={members} />}
-      {activeTab === "activities" && (
-        <div>
-          <ExpensesList expenses={expenses} participants={participants} />
-          <SettlementsList settlements={settlements} />
-        </div>
-      )}
+      <div className="group-content">
+        <HorizontalTabs handleClick={handleTabClick} activeTab={activeTab} />
+        {activeTab === "members" && <MembersList members={members} />}
+        {activeTab === "activities" && (
+          <div>
+            <ExpensesList expenses={expenses} participants={participants} />
+            <SettlementsList settlements={settlements} />
+          </div>
+        )}
 
-      {activeTab === "balances" && (
-        <PendingPayments pendingPayments={pendingPayments} />
-      )}
-      <ActionButtons openModal={openModal} />
+        {activeTab === "balances" && (
+          <PendingPayments pendingPayments={pendingPayments} />
+        )}
+        <ActionButtons openModal={openModal} />
 
-      {activeModal === "addMember" && (
-        <AddMemberModal
-          groupId={group.group_id}
-          onSuccess={fetchGroupDetails}
-          closeModal={closeModal}
-        />
-      )}
+        {activeModal === "addMember" && (
+          <AddMemberModal
+            groupId={group.group_id}
+            onSuccess={fetchGroupDetails}
+            closeModal={closeModal}
+          />
+        )}
 
-      {activeModal === "addExpense" && (
-        <AddExpenseModal
-          groupId={group.group_id}
-          onSuccess={fetchGroupDetails}
-          closeModal={closeModal}
-        />
-      )}
+        {activeModal === "addExpense" && (
+          <AddExpenseModal
+            groupId={group.group_id}
+            onSuccess={fetchGroupDetails}
+            closeModal={closeModal}
+          />
+        )}
 
-      {activeModal === "addSettlement" && (
-        <AddSettlementModal
-          groupId={group.group_id}
-          onSuccess={fetchGroupDetails}
-          closeModal={closeModal}
-        />
-      )}
+        {activeModal === "addSettlement" && (
+          <AddSettlementModal
+            groupId={group.group_id}
+            onSuccess={fetchGroupDetails}
+            closeModal={closeModal}
+          />
+        )}
+      </div>
     </motion.div>
   );
 }

@@ -7,10 +7,8 @@ function GroupInfo({ group, onBackClick }) {
       className="group-info"
       style={{
         marginTop: "30px",
-        marginBottom: "20px",
         padding: "15px",
         border: "1px solid #ccc",
-        borderRadius: "8px",
       }}
     >
       <BackButton onClick={onBackClick} />
@@ -24,9 +22,6 @@ function GroupInfo({ group, onBackClick }) {
       <p>
         <strong>Created At:</strong>{" "}
         {new Date(group.created_at).toLocaleString()}
-      </p>
-      <p>
-        <strong>Group Id:</strong> {group.group_id || "N/A"}
       </p>
     </div>
   );
