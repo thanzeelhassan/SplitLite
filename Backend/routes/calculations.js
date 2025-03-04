@@ -1,7 +1,6 @@
 const express = require("express");
 const sql = require("../config/database");
 const authenticateToken = require("../middleware/authenticatetoken");
-const { calculate } = require("../services/calculationService");
 const { getCachedItems } = require("../services/getAllCachedData");
 
 const router = express.Router();
