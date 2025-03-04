@@ -60,7 +60,6 @@ router.post("/calculations", authenticateToken, async (req, res) => {
         const data = await response.json();
         groupData.groupMembers = data.members; // Update with the fetched data
 
-        console.log("Updated groupData:", groupData);
       } catch (error) {
         console.error("Error fetching group members:", error);
       }
@@ -70,63 +69,70 @@ router.post("/calculations", authenticateToken, async (req, res) => {
       console.error("Error: settlements data is missing or not an array");
     }
     if (groupData.settlements.length === 0) {
-      groupData.settlements = [
-        {
-          settlement_id: 7,
-          payer_id: 13,
-          payee_id: 11,
-          amount: "100.00",
-          created_at: "2025-01-21T03:18:09.905Z",
-          user_id_payer: 13,
-          name_payer: "kiran",
-          user_id_payee: 11,
-          name_payee: "thanzeelhassan",
-        },
-      ];
+      try {
+        console.log("Fetching group settlements from API...");
+        const apiUrl = `${req.protocol}://${req.get(
+          "host"
+        )}/groups/${group_id}/settlements`;
+
+        console.log("apiURL : ", apiUrl);
+
+        const token = req.cookies.authToken;
+        const response = await fetch(apiUrl, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch group settlements: ${response.statusText}`
+          );
+        }
+
+        const data = await response.json();
+        groupData.settlements = data.settlements;
+
+      } catch (error) {
+        console.error("Error fetching group settlements:", error);
+      }
     }
 
     if (!groupData.expenses || !Array.isArray(groupData.expenses)) {
       console.error("Error: expenses data is missing or not an array");
     }
     if (groupData.expenses.length === 0) {
-      groupData.expenses = [
-        {
-          expense_id: 15,
-          paid_by: 13,
-          amount: "500.00",
-          description: "ola",
-          created_at: "2025-01-24T03:09:42.690Z",
-          name: "kiran",
-          user_id: 13,
-        },
-        {
-          expense_id: 14,
-          paid_by: 11,
-          amount: "1000.00",
-          description: "swiggy",
-          created_at: "2025-01-24T02:58:17.060Z",
-          name: "thanzeelhassan",
-          user_id: 11,
-        },
-        {
-          expense_id: 11,
-          paid_by: 11,
-          amount: "300.00",
-          description: "uber",
-          created_at: "2025-01-21T03:12:11.640Z",
-          name: "thanzeelhassan",
-          user_id: 11,
-        },
-        {
-          expense_id: 10,
-          paid_by: 11,
-          amount: "100.00",
-          description: "momos",
-          created_at: "2025-01-21T03:11:28.436Z",
-          name: "thanzeelhassan",
-          user_id: 11,
-        },
-      ];
+      try {
+        console.log("Fetching group expenses from API...");
+        const apiUrl = `${req.protocol}://${req.get(
+          "host"
+        )}/groups/${group_id}/expenses`;
+
+        console.log("apiURL : ", apiUrl);
+
+        const token = req.cookies.authToken;
+        const response = await fetch(apiUrl, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch group expenses: ${response.statusText}`
+          );
+        }
+
+        const data = await response.json();
+        groupData.expenses = data.expenses;
+
+      } catch (error) {
+        console.error("Error fetching group expenses:", error);
+      }
     }
 
     if (
@@ -138,106 +144,37 @@ router.post("/calculations", authenticateToken, async (req, res) => {
       );
     }
     if (groupData.expenseParticipants.length === 0) {
-      groupData.expenseParticipants = [
-        {
-          expense_id: 15,
-          expense_participant_id: 11,
-          paid_by: 13,
-          amount: "500.00",
-          amount_owed: "500.00",
-          user_id: 11,
-          participant_name: "thanzeelhassan",
-          created_at: "2025-01-24T03:09:42.690Z",
-          description: "ola",
-          paid_by_name: "kiran",
-        },
-        {
-          expense_id: 14,
-          expense_participant_id: 10,
-          paid_by: 11,
-          amount: "1000.00",
-          amount_owed: "500.00",
-          user_id: 24,
-          participant_name: "test",
-          created_at: "2025-01-24T02:58:17.060Z",
-          description: "swiggy",
-          paid_by_name: "thanzeelhassan",
-        },
-        {
-          expense_id: 14,
-          expense_participant_id: 9,
-          paid_by: 11,
-          amount: "1000.00",
-          amount_owed: "500.00",
-          user_id: 11,
-          participant_name: "thanzeelhassan",
-          created_at: "2025-01-24T02:58:17.060Z",
-          description: "swiggy",
-          paid_by_name: "thanzeelhassan",
-        },
-        {
-          expense_id: 11,
-          expense_participant_id: 8,
-          paid_by: 11,
-          amount: "300.00",
-          amount_owed: "100.00",
-          user_id: 24,
-          participant_name: "test",
-          created_at: "2025-01-21T03:12:11.640Z",
-          description: "uber",
-          paid_by_name: "thanzeelhassan",
-        },
-        {
-          expense_id: 11,
-          expense_participant_id: 6,
-          paid_by: 11,
-          amount: "300.00",
-          amount_owed: "100.00",
-          user_id: 11,
-          participant_name: "thanzeelhassan",
-          created_at: "2025-01-21T03:12:11.640Z",
-          description: "uber",
-          paid_by_name: "thanzeelhassan",
-        },
-        {
-          expense_id: 11,
-          expense_participant_id: 7,
-          paid_by: 11,
-          amount: "300.00",
-          amount_owed: "100.00",
-          user_id: 13,
-          participant_name: "kiran",
-          created_at: "2025-01-21T03:12:11.640Z",
-          description: "uber",
-          paid_by_name: "thanzeelhassan",
-        },
-        {
-          expense_id: 10,
-          expense_participant_id: 4,
-          paid_by: 11,
-          amount: "100.00",
-          amount_owed: "50.00",
-          user_id: 11,
-          participant_name: "thanzeelhassan",
-          created_at: "2025-01-21T03:11:28.436Z",
-          description: "momos",
-          paid_by_name: "thanzeelhassan",
-        },
-        {
-          expense_id: 10,
-          expense_participant_id: 5,
-          paid_by: 11,
-          amount: "100.00",
-          amount_owed: "50.00",
-          user_id: 13,
-          participant_name: "kiran",
-          created_at: "2025-01-21T03:11:28.436Z",
-          description: "momos",
-          paid_by_name: "thanzeelhassan",
-        },
-      ];
+      try {
+        console.log("Fetching group expenseParticipants from API...");
+        const apiUrl = `${req.protocol}://${req.get(
+          "host"
+        )}/groups/${group_id}/expenseparticipants`;
+
+        console.log("apiURL : ", apiUrl);
+
+        const token = req.cookies.authToken;
+        const response = await fetch(apiUrl, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch group expenseParticipants: ${response.statusText}`
+          );
+        }
+
+        const data = await response.json();
+        groupData.expenseParticipants = data.expenseParticipants;
+
+      } catch (error) {
+        console.error("Error fetching group expenseParticipants:", error);
+      }
     }
-    // console.log("Updated groupData:", groupData);
+    console.log("Updated groupData:", groupData);
 
     const receivables = calculateOutstanding(groupData);
 
