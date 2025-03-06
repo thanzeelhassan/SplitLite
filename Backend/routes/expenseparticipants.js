@@ -43,7 +43,7 @@ router.get(
           result.length > 0
             ? "Expense participants retrieved successfully."
             : "No expense participants found for this group.",
-        expenseparticipants: result,
+        expenseParticipants: result,
       });
     } catch (err) {
       console.error(err);

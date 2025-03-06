@@ -38,38 +38,38 @@ router.get("/groups", authenticateToken, async (req, res) => {
     // Store results in cache
     storeGroups(req.user.user_id, cachedGroups);
 
-    const groupsWithBalance = await Promise.all(
-      groups.map(async (group) => {
-        try {
-          const receivables = await calculate(group.group_id);
+    // const groupsWithBalance = await Promise.all(
+    //   groups.map(async (group) => {
+    //     try {
+    //       const receivables = await calculate(group.group_id);
 
-          let groupBalance = 0;
+    //       let groupBalance = 0;
 
-          if (receivables && receivables.length > 0) {
-            const userReceivable = receivables.find(
-              (r) => r.user_id === req.user.user_id
-            );
+    //       if (receivables && receivables.length > 0) {
+    //         const userReceivable = receivables.find(
+    //           (r) => r.user_id === req.user.user_id
+    //         );
 
-            if (userReceivable) {
-              groupBalance = parseFloat(userReceivable.balance);
-            }
-          }
+    //         if (userReceivable) {
+    //           groupBalance = parseFloat(userReceivable.balance);
+    //         }
+    //       }
 
-          return {
-            ...group,
-            balance: groupBalance,
-          };
-        } catch (err) {
-          console.error(`Error for group ${group.group_id}:`, err);
-          return group; // Return group without receivables on error
-        }
-      })
-    );
+    //       return {
+    //         ...group,
+    //         balance: groupBalance,
+    //       };
+    //     } catch (err) {
+    //       console.error(`Error for group ${group.group_id}:`, err);
+    //       return group; // Return group without receivables on error
+    //     }
+    //   })
+    // );
 
     res.status(200).json({
       message: "Groups retrieved successfully.",
       // totalBalance: totalBalance, // Total amount user owes
-      groups: groupsWithBalance,
+      groups: groups,
     });
   } catch (err) {
     console.error(err);
