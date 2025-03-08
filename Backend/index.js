@@ -17,15 +17,15 @@ app.use(
 );
 
 // Routes
-const authRoutes = require("../routes/auth");
-const userRoutes = require("../routes/users");
-const groupRoutes = require("../routes/groups");
-const groupmembersRoutes = require("../routes/groupmembers");
-const expenseRoutes = require("../routes/expenses");
-const settlementRoutes = require("../routes/settlements");
-const expenseparticipantsRoutes = require("../routes/expenseparticipants");
-const outstandingRoutes = require("../routes/outstanding");
-const calculationsRoutes = require("../routes/calculations");
+const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/users");
+const groupRoutes = require("./routes/groups");
+const groupmembersRoutes = require("./routes/groupmembers");
+const expenseRoutes = require("./routes/expenses");
+const settlementRoutes = require("./routes/settlements");
+const expenseparticipantsRoutes = require("./routes/expenseparticipants");
+const outstandingRoutes = require("./routes/outstanding");
+const calculationsRoutes = require("./routes/calculations");
 
 // Use routes
 app.use("/", authRoutes);
