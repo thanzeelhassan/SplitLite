@@ -9,6 +9,3 @@ https://split-lite.vercel.app/
 
 Netlify - Used for front end
 https://splitlite.netlify.app/
-
-
-test
