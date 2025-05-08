@@ -1,6 +1,7 @@
 npm install - To install the dependencies
 npm start - Start the server
 npm run dev - Use for local development. Does the same thing as npm start, but code changes are reflected instantly.
+npm run build -> to make a production build. Build is made in a folder called dist
 
 create a file called .env.development
 add this :
