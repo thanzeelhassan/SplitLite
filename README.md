@@ -11,4 +11,5 @@ Netlify - Used for front end
 https://splitlite.netlify.app/
 
 
-test
+NeonDB - Used for hosting the database
+https://neon.tech/

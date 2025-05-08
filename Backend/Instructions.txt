@@ -1,3 +1,10 @@
 npm install - To install the dependencies
 npm start - Start the server
 npm run dev - Use for local development. Does the same thing as npm start, but code changes are reflected instantly.
+
+
+Create a file called .env in this folder
+Add this value:
+DATABASE_URL='<database_type>://neondb_owner:<neon_db_endpoint>/neondb?sslmode=require'
+
+You will get this entire value from the Neondb site where the database is hosted
